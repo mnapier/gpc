@@ -791,15 +791,24 @@ describe("createReportingClient", () => {
     expect(url).toContain("pageSize=25");
   });
 
-  it("searchErrorReports calls GET with issue name", async () => {
+  it("searchErrorReports calls errorReports:search with issueId filter", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse({ errorReports: [] }));
 
     const client = makeClient();
-    await client.searchErrorReports(PKG, "issue-1", 10);
+    await client.searchErrorReports(PKG, "1234", 10);
 
     const [url] = mockFetch.mock.calls[0];
-    expect(url).toContain(`/apps/${PKG}/errorIssues/issue-1/reports`);
-    expect(url).toContain("pageSize=10");
+    expect(url).toContain(`/apps/${PKG}/errorReports:search`);
+    const params = new URL(url).searchParams;
+    expect(params.get("filter")).toBe("errorIssueId = 1234");
+    expect(params.get("pageSize")).toBe("10");
+  });
+
+  it("searchErrorReports rejects non-numeric issueId", async () => {
+    const client = makeClient();
+    await expect(client.searchErrorReports(PKG, "abc-bad", 10)).rejects.toThrow(
+      "Invalid error issue ID",
+    );
   });
 });
 

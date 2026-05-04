@@ -1,3 +1,4 @@
+import { PlayApiError } from "./errors.js";
 import { createHttpClient } from "./http.js";
 import { createRateLimiter, RATE_LIMIT_BUCKETS } from "./rate-limiter.js";
 import type {
@@ -36,7 +37,7 @@ export interface ReportingApiClient {
 
   searchErrorReports(
     packageName: string,
-    issueName: string,
+    issueId: string,
     pageSize?: number,
     pageToken?: string,
   ): Promise<ErrorReportsResponse>;
@@ -83,13 +84,23 @@ export function createReportingClient(options: ApiClientOptions): ReportingApiCl
       return data;
     },
 
-    async searchErrorReports(packageName, issueName, pageSize?, pageToken?) {
+    async searchErrorReports(packageName, issueId, pageSize?, pageToken?) {
+      if (!/^\d+$/.test(issueId)) {
+        throw new PlayApiError(
+          "Invalid error issue ID: must be numeric.",
+          "API_INVALID_INPUT",
+          undefined,
+          "Provide a valid numeric error issue ID from errorIssues.search.",
+        );
+      }
       await limiter.acquire("reporting");
-      const params: Record<string, string> = {};
+      const params: Record<string, string> = {
+        filter: `errorIssueId = ${issueId}`,
+      };
       if (pageSize) params["pageSize"] = String(pageSize);
       if (pageToken) params["pageToken"] = pageToken;
       const { data } = await http.get<ErrorReportsResponse>(
-        `/apps/${packageName}/errorIssues/${issueName}/reports`,
+        `/apps/${packageName}/errorReports:search`,
         params,
       );
       return data;
