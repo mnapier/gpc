@@ -293,6 +293,17 @@ html {
   color: var(--vp-c-brand-1) !important;
 }
 
+.VPSocialLinks .VPSocialLink {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.VPSocialLink > svg,
+.VPSocialLink > [class^="vpi-social-"] {
+  width: 18px !important;
+  height: 18px !important;
+}
+
 /* ================================================================
    SIDEBAR
    ================================================================ */
