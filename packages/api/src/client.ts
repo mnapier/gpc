@@ -1,5 +1,14 @@
 import { PlayApiError } from "./errors.js";
 import { createHttpClient } from "./http.js";
+
+const _deprecationWarned = new Set<string>();
+function warnOnce(code: string, msg: string): void {
+  if (_deprecationWarned.has(code)) return;
+  _deprecationWarned.add(code);
+  if (typeof process !== "undefined" && process.emitWarning) {
+    process.emitWarning(msg, { type: "DeprecationWarning", code });
+  }
+}
 import type { RateLimiter } from "./rate-limiter.js";
 import { resolveBucket, createRateLimiter } from "./rate-limiter.js";
 import type {
@@ -1417,12 +1426,10 @@ export function createApiClient(options: ApiClientOptions): PlayApiClient {
       },
 
       async getSubscriptionV1(packageName, subscriptionId, token) {
-        if (typeof process !== "undefined" && process.emitWarning) {
-          process.emitWarning(
-            "purchases.subscriptions.get (v1) is deprecated by Google (shutdown Aug 2027). Use getSubscriptionV2() instead.",
-            "DeprecationWarning",
-          );
-        }
+        warnOnce(
+          "GPC_DEP001",
+          "purchases.subscriptions.get (v1) is deprecated by Google (shutdown Aug 2027). Use getSubscriptionV2() instead.",
+        );
         const { data } = await http.get<SubscriptionPurchase>(
           `/${packageName}/purchases/subscriptions/${subscriptionId}/tokens/${token}`,
         );
@@ -1430,12 +1437,20 @@ export function createApiClient(options: ApiClientOptions): PlayApiClient {
       },
 
       async cancelSubscription(packageName, subscriptionId, token) {
+        warnOnce(
+          "GPC_DEP002",
+          "purchases.subscriptions.cancel (v1) is deprecated by Google (shutdown Aug 2027). Use cancelSubscriptionV2() instead.",
+        );
         await http.post(
           `/${packageName}/purchases/subscriptions/${subscriptionId}/tokens/${token}:cancel`,
         );
       },
 
       async deferSubscription(packageName, subscriptionId, token, body) {
+        warnOnce(
+          "GPC_DEP003",
+          "purchases.subscriptions.defer (v1) is deprecated by Google (shutdown Aug 2027). Use deferSubscriptionV2() instead.",
+        );
         const { data } = await http.post<SubscriptionDeferResponse>(
           `/${packageName}/purchases/subscriptions/${subscriptionId}/tokens/${token}:defer`,
           body,
@@ -1444,6 +1459,10 @@ export function createApiClient(options: ApiClientOptions): PlayApiClient {
       },
 
       async acknowledgeSubscription(packageName, subscriptionId, token, body?) {
+        warnOnce(
+          "GPC_DEP004",
+          "purchases.subscriptions.acknowledge (v1) is deprecated by Google (shutdown Aug 2027). No direct v2 replacement exists; prefer subscriptionsv2 surfaces where possible.",
+        );
         await http.post(
           `/${packageName}/purchases/subscriptions/${subscriptionId}/tokens/${token}:acknowledge`,
           body ?? {},
