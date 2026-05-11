@@ -16,6 +16,7 @@ GPC is a TypeScript CLI for the Google Play Developer API v3. It replaces the Pl
 - Tests: 2,281 (90%+ coverage)
 - Licensing: Free to use. Source code is on GitHub.
 - Repo: https://github.com/yasserstudio/gpc
+- Notable v0.9.73 feature: `gpc skills check` reports installed skill versions and checks for updates. `gpc doctor` detects Google's Android CLI. `--changelog-ai` flag on `gpc releases upload` generates AI-translated release notes inline during upload.
 - Notable v0.9.71 feature: `gpc doctor` now checks API quota proximity (warns when daily or per-minute usage exceeds 80%) and plugin health (discovers, loads, and reports each configured plugin). Two new check names: `quota` and `plugin-*`.
 - Notable v0.9.70 feature: `--in-app-update-priority <0-5>` and `--retain-version-codes <csv>` flags on release upload. `default.txt` Fastlane-style changelog fallback (versioned release notes from `{lang}/{versionCode}.txt` with `default.txt` per language). Promote preserves `inAppUpdatePriority` and `name` from source release. Vitals freshness clamping: queries Google's freshness endpoint to avoid 400 errors when data lags. GitHub Actions Node.js 22.
 - Notable v0.9.69 feature: `gpc listings images sync` — SHA-256 content-hash image sync (skip unchanged, upload only what's different). `gpc bundles list/find/wait` for querying and waiting on bundle processing. `changesNotSentForReview` auto-rescue on rejected-update 403s.
@@ -703,5 +704,5 @@ All errors include a code, message, and suggestion. Common codes:
 
 ---
 
-*Generated from GPC v0.9.71 documentation.*
+*Generated from GPC v0.9.73 documentation.*
 *Source: https://github.com/yasserstudio/gpc*
