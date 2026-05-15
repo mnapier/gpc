@@ -30,6 +30,15 @@ function sanitizeErrorBody(body: string): string {
   return cleaned.length > 200 ? cleaned.slice(0, 200) + "..." : cleaned;
 }
 
+const SENSITIVE_PATH_SEGMENTS = /\/(tokens|purchases|purchaseToken)\//i;
+
+function redactPath(path: string): string {
+  return path.replace(SENSITIVE_PATH_SEGMENTS, (match) => {
+    const parts = match.split("/").filter(Boolean);
+    return `/${parts[0]}/***REDACTED***/`;
+  });
+}
+
 /** Validate upload file path to prevent path traversal. */
 function validateFilePath(filePath: string): string {
   const resolved = resolve(filePath);
@@ -495,7 +504,7 @@ export function createHttpClient(options: ApiClientOptions): HttpClient {
 
         const err = new PlayApiError(
           mapped.message ??
-            `${method} ${path} failed with status ${response.status}: ${sanitizeErrorBody(errorBody)}`,
+            `${method} ${redactPath(path)} failed with status ${response.status}: ${sanitizeErrorBody(errorBody)}`,
           mapped.code,
           response.status,
           mapped.suggestion,
@@ -507,7 +516,7 @@ export function createHttpClient(options: ApiClientOptions): HttpClient {
           onRetry?.({
             attempt: attempt + 1,
             method,
-            path,
+            path: redactPath(path),
             status: response.status,
             error: err.message,
             delayMs: Math.round(delay),

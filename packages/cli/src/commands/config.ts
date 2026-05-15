@@ -123,7 +123,7 @@ export function registerConfigCommands(program: Command): void {
     .description("Set a configuration value")
     .action(async (key: string, value: string) => {
       await setConfigValue(key, value);
-      console.log(`Set ${key} = ${value}`);
+      console.log(`Set ${key}`);
     });
 
   config

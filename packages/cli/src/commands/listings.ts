@@ -447,6 +447,11 @@ export function registerListingsCommands(program: Command): void {
         interactive,
       );
 
+      if (isDryRun(program)) {
+        printDryRun("upload-image", { file, lang: options.lang, type: options.type });
+        return;
+      }
+
       const client = await getClient(config);
       const format = getOutputFormat(program, config);
       const imageType = validateImageType(options.type);
@@ -514,6 +519,11 @@ export function registerListingsCommands(program: Command): void {
       );
 
       await requireConfirm(`Delete image "${options.id}"?`, program);
+
+      if (isDryRun(program)) {
+        printDryRun("delete-image", { id: options.id, lang: options.lang, type: options.type });
+        return;
+      }
 
       const client = await getClient(config);
       const imageType = validateImageType(options.type);

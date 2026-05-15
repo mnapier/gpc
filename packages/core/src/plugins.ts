@@ -216,8 +216,16 @@ export interface DiscoverPluginsOptions {
   /** Plugin names from config file */
   configPlugins?: string[];
 
+  /** Approved third-party plugin names (from config.approvedPlugins) */
+  approvedPlugins?: string[];
+
   /** Working directory for node_modules scanning */
   cwd?: string;
+}
+
+function isPluginTrusted(specifier: string, approved?: Set<string>): boolean {
+  if (specifier.startsWith("@gpc-cli/")) return true;
+  return approved?.has(specifier) ?? false;
 }
 
 /**
@@ -225,15 +233,19 @@ export interface DiscoverPluginsOptions {
  * 1. Explicit config: gpc.config.ts → plugins: [...]
  * 2. Convention: node_modules/@gpc-cli/plugin-*
  * 3. Convention: node_modules/gpc-plugin-*
+ *
+ * Only trusted/approved plugins are imported. Untrusted specifiers are
+ * skipped before import() to prevent top-level module code execution.
  */
 export async function discoverPlugins(options?: DiscoverPluginsOptions): Promise<GpcPlugin[]> {
   const plugins: GpcPlugin[] = [];
   const seen = new Set<string>();
+  const approved = options?.approvedPlugins ? new Set(options.approvedPlugins) : undefined;
 
-  // Source 1: Explicit config plugins
   if (options?.configPlugins) {
     for (const name of options.configPlugins) {
       if (seen.has(name)) continue;
+      if (!isPluginTrusted(name, approved)) continue;
       try {
         const mod = await import(name);
         const plugin = resolvePlugin(mod);

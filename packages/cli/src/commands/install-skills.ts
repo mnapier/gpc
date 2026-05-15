@@ -40,10 +40,18 @@ export function registerInstallSkillsCommand(program: Command): void {
         args.push("--all");
       }
 
+      const sensitivePattern = /key|token|secret|credential|password/i;
+      const safeEnv: Record<string, string> = {};
+      for (const [k, v] of Object.entries(process.env)) {
+        if (v !== undefined && !sensitivePattern.test(k)) {
+          safeEnv[k] = v;
+        }
+      }
+
       try {
         execFileSync("npx", args, {
           stdio: "inherit",
-          env: { ...process.env },
+          env: safeEnv,
         });
       } catch (err: unknown) {
         const exitCode = (err as { status?: number }).status ?? 1;

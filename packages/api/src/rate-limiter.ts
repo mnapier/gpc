@@ -75,41 +75,51 @@ export function createRateLimiter(buckets?: RateLimitBucket[]): RateLimiter {
     });
   }
 
+  const mutexes = new Map<string, Promise<void>>();
+
+  function acquireSync(state: BucketState): number {
+    const now = Date.now();
+    const elapsed = now - state.lastRefillTime;
+    const refill = Math.floor(
+      (elapsed / state.config.refillIntervalMs) * state.config.refillRate,
+    );
+
+    if (refill > 0) {
+      state.tokens = Math.min(state.config.maxTokens, state.tokens + refill);
+      state.lastRefillTime = now;
+    }
+
+    if (state.tokens > 0) {
+      state.tokens--;
+      return 0;
+    }
+
+    return Math.ceil(
+      (1 / state.config.refillRate) * state.config.refillIntervalMs,
+    );
+  }
+
   return {
     async acquire(bucket: string): Promise<void> {
       const state = states.get(bucket);
       if (!state) return;
 
-      const now = Date.now();
-      const elapsed = now - state.lastRefillTime;
-      const refill = Math.floor(
-        (elapsed / state.config.refillIntervalMs) * state.config.refillRate,
-      );
+      const prev = mutexes.get(bucket) ?? Promise.resolve();
+      const next = prev.then(async () => {
+        const waitMs = acquireSync(state);
+        if (waitMs <= 0) return;
 
-      if (refill > 0) {
-        state.tokens = Math.min(state.config.maxTokens, state.tokens + refill);
-        state.lastRefillTime = now;
-      }
-
-      if (state.tokens > 0) {
-        state.tokens--;
-        return;
-      }
-
-      const tokensNeeded = 1;
-      const waitMs = Math.ceil(
-        (tokensNeeded / state.config.refillRate) * state.config.refillIntervalMs,
-      );
-      await new Promise((r) => setTimeout(r, waitMs));
-
-      // Recalculate refill based on actual elapsed time since last refill
-      const afterWait = Date.now();
-      const totalElapsed = afterWait - state.lastRefillTime;
-      const newTokens = Math.floor(
-        (totalElapsed / state.config.refillIntervalMs) * state.config.refillRate,
-      );
-      state.tokens = Math.max(0, Math.min(state.config.maxTokens, newTokens) - 1);
-      state.lastRefillTime = afterWait;
+        await new Promise((r) => setTimeout(r, waitMs));
+        const afterWait = Date.now();
+        const totalElapsed = afterWait - state.lastRefillTime;
+        const newTokens = Math.floor(
+          (totalElapsed / state.config.refillIntervalMs) * state.config.refillRate,
+        );
+        state.tokens = Math.max(0, Math.min(state.config.maxTokens, newTokens) - 1);
+        state.lastRefillTime = afterWait;
+      });
+      mutexes.set(bucket, next);
+      await next;
     },
   };
 }

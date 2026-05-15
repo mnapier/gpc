@@ -1,5 +1,5 @@
-import { readdir, readFile, stat } from "node:fs/promises";
-import { extname, basename, join } from "node:path";
+import { readdir, readFile, lstat } from "node:fs/promises";
+import { extname, basename, join, resolve } from "node:path";
 import { GpcError } from "../errors.js";
 
 export interface ReleaseNote {
@@ -36,8 +36,8 @@ export async function readReleaseNotesFromDir(dir: string): Promise<ReleaseNote[
     const language = basename(entry, ".txt");
     const filePath = join(dir, entry);
 
-    const stats = await stat(filePath);
-    if (!stats.isFile()) continue;
+    const stats = await lstat(filePath);
+    if (!stats.isFile() || stats.isSymbolicLink()) continue;
 
     const text = (await readFile(filePath, "utf-8")).trim();
     if (text.length === 0) continue;
@@ -60,8 +60,8 @@ export async function isVersionedNotesDir(dir: string): Promise<boolean> {
   for (const entry of entries) {
     if (!LOCALE_PATTERN.test(entry)) continue;
     const entryPath = join(dir, entry);
-    const stats = await stat(entryPath);
-    if (stats.isDirectory()) return true;
+    const stats = await lstat(entryPath);
+    if (stats.isDirectory() && !stats.isSymbolicLink()) return true;
   }
   return false;
 }
@@ -95,8 +95,8 @@ export async function readReleaseNotesForVersion(
 
   for (const entry of entries) {
     const entryPath = join(dir, entry);
-    const stats = await stat(entryPath);
-    if (!stats.isDirectory()) continue;
+    const stats = await lstat(entryPath);
+    if (!stats.isDirectory() || stats.isSymbolicLink()) continue;
 
     const language = entry;
     const versionFile = join(entryPath, `${versionCode}.txt`);

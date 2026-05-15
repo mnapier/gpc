@@ -103,7 +103,9 @@ export function checkProxy(url: string | undefined): CheckResult | null {
   if (!url) return null;
   try {
     new URL(url);
-    return { name: "proxy", status: "pass", message: `Proxy configured: ${url}` };
+    const parsed = new URL(url);
+    const safeUrl = `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
+    return { name: "proxy", status: "pass", message: `Proxy configured: ${safeUrl}` };
   } catch {
     return {
       name: "proxy",

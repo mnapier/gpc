@@ -662,16 +662,7 @@ export function registerReleasesCommands(program: Command): void {
 
       const client = await getClient(config);
 
-      const result = await updateRollout(
-        client,
-        packageName,
-        options.track,
-        action,
-        options.to ? Number(options.to) / 100 : undefined,
-        buildCommitOptions(options),
-      );
-
-      // Vitals gate: check crash rate after rollout increase
+      // Vitals gate: check crash rate BEFORE rollout increase
       if (action === "increase" && options.vitalsGate) {
         const threshold = (config as any).vitals?.thresholds?.crashRate;
         if (!threshold) {
@@ -691,11 +682,11 @@ export function registerReleasesCommands(program: Command): void {
             const latest = (vitalsResult as any).data?.[0]?.crashRate;
             const check = checkThreshold(latest, threshold);
             if (check.breached) {
-              await updateRollout(client, packageName, options.track, "halt");
               console.error(
-                `Vitals gate: crash rate ${String(latest)}% > threshold ${String(threshold)}%. Rollout halted.`,
+                `Vitals gate: crash rate ${String(latest)}% > threshold ${String(threshold)}%. Rollout increase blocked.`,
               );
               process.exitCode = 6;
+              return;
             }
           } catch (vitalsErr) {
             console.error(
@@ -704,6 +695,15 @@ export function registerReleasesCommands(program: Command): void {
           }
         }
       }
+
+      const result = await updateRollout(
+        client,
+        packageName,
+        options.track,
+        action,
+        options.to ? Number(options.to) / 100 : undefined,
+        buildCommitOptions(options),
+      );
 
       console.log(formatOutput(result, format));
     });

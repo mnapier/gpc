@@ -467,7 +467,7 @@ describe("resumableUpload", () => {
 
   it("sends initialMetadata as JSON in the session-initiation POST", async () => {
     const fileSize = 1024 * 1024; // 1 MB, single chunk
-    const sessionUri = "https://upload.example.com/session/custom-app";
+    const sessionUri = "https://playcustomapp.googleapis.com/session/custom-app";
 
     mockStat.mockResolvedValue({ size: fileSize });
     mockOpen.mockResolvedValue(createMockFileHandle(fileSize));

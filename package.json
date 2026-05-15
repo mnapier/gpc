@@ -34,7 +34,7 @@
     "printWidth": 100
   },
   "pnpm": {
-    "onlyBuiltDependencies": []
+    "onlyBuiltDependencies": ["turbo", "esbuild"]
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

@@ -98,10 +98,11 @@ if (notifyOpt !== undefined && notifyOpt !== false) {
   try {
     const config = await loadConfig();
     if (config.webhooks) {
-      const commandName = process.argv
-        .slice(2)
-        .filter((a) => !a.startsWith("--notify"))
-        .join(" ");
+      const sensitiveFlags = ["--notify", "--store-pass", "--key-pass", "--token", "--service-account"];
+      const filtered = process.argv.slice(2).filter((a) => {
+        return !sensitiveFlags.some((f) => a.startsWith(f));
+      });
+      const commandName = filtered.join(" ");
       const payload: WebhookPayload = {
         command: commandName || "unknown",
         success: commandSuccess,

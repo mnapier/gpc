@@ -117,14 +117,13 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      GPC_SERVICE_ACCOUNT: \${{ secrets.GPC_SERVICE_ACCOUNT }}
       GPC_APP: ${pkg}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Build
         run: ./gradlew bundleRelease
@@ -140,6 +139,8 @@ jobs:
           gpc releases upload app/build/outputs/bundle/release/app-release.aab \\
             --track internal \\
             --json
+        env:
+          GPC_SERVICE_ACCOUNT: \${{ secrets.GPC_SERVICE_ACCOUNT }}
 `;
 }
 

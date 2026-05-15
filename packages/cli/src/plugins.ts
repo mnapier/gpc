@@ -18,24 +18,12 @@ export async function loadPlugins(): Promise<PluginManager> {
   try {
     const { loadConfig } = await import("@gpc-cli/config");
     const config = await loadConfig();
-    const plugins = await discoverPlugins({ configPlugins: config.plugins });
-    const approved = new Set(config.approvedPlugins ?? []);
+    const plugins = await discoverPlugins({
+      configPlugins: config.plugins,
+      approvedPlugins: config.approvedPlugins,
+    });
 
     for (const plugin of plugins) {
-      const isTrusted = plugin.name.startsWith("@gpc-cli/");
-
-      if (!isTrusted && !approved.has(plugin.name)) {
-        // Skip unapproved third-party plugins silently in non-interactive mode
-        // In interactive mode, the user would run `gpc plugins approve <name>` first
-        const isQuiet = process.argv.includes("--quiet") || process.argv.includes("-q");
-        if (!isQuiet) {
-          console.error(
-            `Plugin "${plugin.name}" is not approved. Run: gpc plugins approve ${plugin.name}`,
-          );
-        }
-        continue;
-      }
-
       try {
         await manager.load(plugin);
       } catch {

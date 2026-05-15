@@ -28,6 +28,38 @@ function isResumeIncomplete(response: Response): boolean {
 /** 8 MB — default chunk size (multiple of 256 KB). */
 const DEFAULT_CHUNK_SIZE = 8 * 1024 * 1024;
 
+function validateSessionUri(sessionUri: string, uploadUrl: string): void {
+  let session: URL;
+  let upload: URL;
+  try {
+    session = new URL(sessionUri);
+    upload = new URL(uploadUrl);
+  } catch {
+    throw new PlayApiError(
+      "Invalid session URI or upload URL",
+      "UPLOAD_INVALID_URI",
+      0,
+      "The resumable session URI must be a valid HTTPS URL.",
+    );
+  }
+  if (session.protocol !== "https:") {
+    throw new PlayApiError(
+      "Resumable session URI must use HTTPS",
+      "UPLOAD_INSECURE_URI",
+      0,
+      "Only HTTPS session URIs are accepted.",
+    );
+  }
+  if (session.hostname !== upload.hostname && !session.hostname.endsWith(".googleapis.com")) {
+    throw new PlayApiError(
+      `Session URI host "${session.hostname}" does not match upload host "${upload.hostname}"`,
+      "UPLOAD_URI_HOST_MISMATCH",
+      0,
+      "The session URI must point to the same Google API host as the upload URL.",
+    );
+  }
+}
+
 /** Files below this threshold use simple upload instead. */
 export const RESUMABLE_THRESHOLD = 5 * 1024 * 1024; // 5 MB
 
@@ -95,6 +127,9 @@ export async function resumableUpload<T>(
 
   // Step 1: Initiate resumable session (or resume existing)
   let sessionUri = options?.resumeSessionUri;
+  if (sessionUri) {
+    validateSessionUri(sessionUri, uploadUrl);
+  }
   if (!sessionUri) {
     sessionUri = await initiateSession(
       uploadUrl,
@@ -313,6 +348,7 @@ async function initiateSession(
     );
   }
 
+  validateSessionUri(location, url);
   return location;
 }
 

@@ -2468,7 +2468,7 @@ describe("enterprise (Play Custom App Publishing)", () => {
   it("create calls the Custom App Publishing upload endpoint with metadata in the init POST", async () => {
     const { createEnterpriseClient } = await importEnterprise();
     const accountId = "1234567890";
-    const sessionUri = "https://upload.example.com/session/custom-app-abc";
+    const sessionUri = "https://playcustomapp.googleapis.com/session/custom-app-abc";
 
     // 1. Resumable session initiation → returns Location header
     mockFetch.mockResolvedValueOnce(
@@ -2510,7 +2510,7 @@ describe("enterprise (Play Custom App Publishing)", () => {
     mockFetch.mockResolvedValueOnce(
       new Response("", {
         status: 200,
-        headers: { Location: "https://upload.example.com/s/1" },
+        headers: { Location: "https://playcustomapp.googleapis.com/s/1" },
       }),
     );
     mockFetch.mockResolvedValueOnce(
