@@ -448,7 +448,17 @@ export function registerListingsCommands(program: Command): void {
       );
 
       if (isDryRun(program)) {
-        printDryRun("upload-image", { file, lang: options.lang, type: options.type });
+        const format = getOutputFormat(program, config);
+        printDryRun(
+          {
+            command: "listings images upload",
+            action: "upload image to",
+            target: `${options.lang}/${options.type}`,
+            details: { file },
+          },
+          format,
+          formatOutput,
+        );
         return;
       }
 
@@ -521,7 +531,16 @@ export function registerListingsCommands(program: Command): void {
       await requireConfirm(`Delete image "${options.id}"?`, program);
 
       if (isDryRun(program)) {
-        printDryRun("delete-image", { id: options.id, lang: options.lang, type: options.type });
+        const format = getOutputFormat(program, config);
+        printDryRun(
+          {
+            command: "listings images delete",
+            action: "delete image",
+            target: `${options.id} (${options.lang}/${options.type})`,
+          },
+          format,
+          formatOutput,
+        );
         return;
       }
 
