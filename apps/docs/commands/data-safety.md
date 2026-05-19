@@ -11,94 +11,15 @@ outline: deep
 
 ## Commands
 
-| Command                                     | Description                              |
-| ------------------------------------------- | ---------------------------------------- |
-| [`data-safety get`](#data-safety-get)       | View current data safety declarations    |
-| [`data-safety update`](#data-safety-update) | Update declarations from a JSON file     |
-| [`data-safety export`](#data-safety-export) | Export declarations to a local directory |
-
-## `data-safety get`
-
-View the current data safety declarations for the app. Shows all declared data types, their purposes, and sharing/collection status.
-
-### Synopsis
-
-```bash
-gpc data-safety get [options]
-```
-
-### Options
-
-| Flag     | Short | Type     | Default | Description      |
-| -------- | ----- | -------- | ------- | ---------------- |
-| `--app`  |       | `string` |         | App package name |
-| `--json` |       | `flag`   |         | Output as JSON   |
-
-### Example
-
-View declarations in table format:
-
-```bash
-gpc data-safety get --app com.example.myapp
-```
-
-```
-Data Safety Declarations
-
-  Data Type          Collected   Shared   Purpose
-  ─────────          ─────────   ──────   ───────
-  Email address      Yes         No       Account management
-  Crash logs         Yes         Yes      Analytics, App functionality
-  Purchase history   Yes         No       App functionality
-  Device ID          Yes         Yes      Analytics, Advertising
-
-  Data deletion request URL: https://example.com/delete-data
-  Security practices: Data encrypted in transit, Data can be deleted
-```
-
-View as JSON:
-
-```bash
-gpc data-safety get --app com.example.myapp --json
-```
-
-```json
-{
-  "dataSafety": {
-    "dataTypes": [
-      {
-        "dataType": "EMAIL_ADDRESS",
-        "dataCategory": "PERSONAL_INFO",
-        "collected": true,
-        "shared": false,
-        "ephemeral": false,
-        "required": true,
-        "purposes": ["ACCOUNT_MANAGEMENT"]
-      },
-      {
-        "dataType": "CRASH_LOGS",
-        "dataCategory": "APP_INFO_AND_PERFORMANCE",
-        "collected": true,
-        "shared": true,
-        "ephemeral": false,
-        "required": true,
-        "purposes": ["ANALYTICS", "APP_FUNCTIONALITY"]
-      }
-    ],
-    "securityPractices": {
-      "dataEncryptedInTransit": true,
-      "canRequestDataDeletion": true,
-      "dataDeletionRequestUrl": "https://example.com/delete-data"
-    }
-  }
-}
-```
-
----
+| Command                                     | Description                                       |
+| ------------------------------------------- | ------------------------------------------------- |
+| [`data-safety update`](#data-safety-update) | Update declarations from a CSV file               |
+| [`data-safety get`](#data-safety-get)       | Not available (no API endpoint)                   |
+| [`data-safety export`](#data-safety-export) | Not available (no API endpoint)                   |
 
 ## `data-safety update`
 
-Update the data safety declarations from a JSON file. The file must follow the Google Play data safety schema. This replaces the entire declaration, so include all data types.
+Update the data safety declarations from a CSV file exported from Google Play Console. The CSV uses the Play Console data safety export format with columns: Question ID, Response, Response value, Answer requirement, and Human-friendly label.
 
 ### Synopsis
 
@@ -108,98 +29,67 @@ gpc data-safety update --file <path> [options]
 
 ### Options
 
-| Flag     | Short | Type     | Default        | Description                    |
-| -------- | ----- | -------- | -------------- | ------------------------------ |
-| `--file` | `-f`  | `string` | **(required)** | Path to JSON declarations file |
-| `--app`  |       | `string` |                | App package name               |
-| `--json` |       | `flag`   |                | Output as JSON                 |
+| Flag     | Short | Type     | Default        | Description                                     |
+| -------- | ----- | -------- | -------------- | ----------------------------------------------- |
+| `--file` |       | `string` | **(required)** | Path to data safety CSV file (Play Console format) |
+| `--app`  |       | `string` |                | App package name                                |
+| `--json` |       | `flag`   |                | Output as JSON                                  |
 
-### Example
+### Workflow
 
-Create a declarations file (`safety.json`):
-
-```json
-{
-  "dataTypes": [
-    {
-      "dataType": "EMAIL_ADDRESS",
-      "dataCategory": "PERSONAL_INFO",
-      "collected": true,
-      "shared": false,
-      "ephemeral": false,
-      "required": true,
-      "purposes": ["ACCOUNT_MANAGEMENT"]
-    },
-    {
-      "dataType": "CRASH_LOGS",
-      "dataCategory": "APP_INFO_AND_PERFORMANCE",
-      "collected": true,
-      "shared": true,
-      "ephemeral": false,
-      "required": true,
-      "purposes": ["ANALYTICS", "APP_FUNCTIONALITY"]
-    }
-  ],
-  "securityPractices": {
-    "dataEncryptedInTransit": true,
-    "canRequestDataDeletion": true,
-    "dataDeletionRequestUrl": "https://example.com/delete-data"
-  }
-}
-```
-
-Apply the update:
+1. Go to **Play Console** > **App content** > **Data safety**
+2. Fill out the form or update it
+3. Click **Export to CSV** to download the file
+4. Version-control the CSV alongside your app code
+5. Push updates via the CLI:
 
 ```bash
-gpc data-safety update --file safety.json --app com.example.myapp
+gpc data-safety update --file data-safety.csv --app com.example.app
 ```
 
 ```
-Data safety declarations updated
-  2 data types declared
-  Data deletion: enabled (https://example.com/delete-data)
-  Encryption in transit: yes
+Data safety declarations updated.
 ```
+
+This lets you keep data safety declarations in source control and apply them from CI without logging into the Play Console.
+
+### Dry run
+
+Preview what would happen without making changes:
+
+```bash
+gpc data-safety update --file data-safety.csv --dry-run
+```
+
+---
+
+## `data-safety get`
+
+The Google Play Developer API does not provide a GET endpoint for data safety declarations. To view your current declarations, use the Play Console web UI:
+
+**Play Console** > **App content** > **Data safety**
 
 ---
 
 ## `data-safety export`
 
-Export the current data safety declarations to a local directory as a JSON file. Useful for version-controlling your declarations alongside your app code.
+The Google Play Developer API does not provide a GET endpoint for data safety declarations, so they cannot be exported via the API. To export your declarations:
 
-### Synopsis
+1. Go to **Play Console** > **App content** > **Data safety**
+2. Click **Export to CSV**
 
-```bash
-gpc data-safety export --dir <path> [options]
-```
-
-### Options
-
-| Flag    | Short | Type     | Default        | Description      |
-| ------- | ----- | -------- | -------------- | ---------------- |
-| `--dir` | `-d`  | `string` | **(required)** | Output directory |
-| `--app` |       | `string` |                | App package name |
-
-### Example
-
-```bash
-gpc data-safety export --dir ./metadata --app com.example.myapp
-```
-
-```
-Exported data safety declarations to ./metadata/data-safety.json
-```
-
-The exported file can be edited and re-applied with `data-safety update --file ./metadata/data-safety.json`.
+The exported CSV can then be version-controlled and re-applied with `data-safety update --file`.
 
 ## Errors
 
-| Code                   | Exit | Description                                                                        |
-| ---------------------- | ---- | ---------------------------------------------------------------------------------- |
-| `VALIDATION_FAILED`    | 2    | The JSON file has invalid data types, missing required fields, or unknown purposes |
-| `INVALID_DELETION_URL` | 2    | The data deletion request URL is malformed or unreachable                          |
-| `API_ERROR`            | 4    | Google Play API rejected the update                                                |
+| Code             | Exit | Description                                     |
+| ---------------- | ---- | ----------------------------------------------- |
+| `FILE_NOT_FOUND` | 1    | The specified CSV file does not exist            |
+| `INVALID_INPUT`  | 1    | The CSV file is empty                            |
+| `FILE_TOO_LARGE` | 1    | The CSV exceeds 1 MB (data safety CSVs are typically a few KB) |
+| `API_ERROR`      | 4    | Google Play API rejected the update              |
 
 ## Related
 
+- [preflight](./preflight) -- Privacy scanner detects tracking SDKs and flags data safety obligations
 - [listings](./listings) -- Store listing management (descriptions, screenshots, etc.)

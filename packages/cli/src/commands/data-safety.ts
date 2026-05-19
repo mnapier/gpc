@@ -59,7 +59,6 @@ export function registerDataSafetyCommands(program: Command): void {
   dataSafety
     .command("export")
     .description("Export data safety declaration to a file")
-    .option("--output <path>", "Output file path", "data-safety.csv")
     .action(async () => {
       const err = new Error(
         "The Google Play Developer API does not provide a GET endpoint for data safety declarations.\n" +

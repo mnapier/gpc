@@ -4737,6 +4737,28 @@ describe("data-safety commands", () => {
       "API error",
     );
   });
+
+  it("importDataSafety rejects missing file", async () => {
+    const client = mockClient();
+    await expect(importDataSafety(client, "com.example", "/no/such/file.csv")).rejects.toThrow(
+      "Cannot read data safety CSV",
+    );
+  });
+
+  it("importDataSafety rejects empty file", async () => {
+    const client = mockClient();
+    const tmpDir = await mkdtemp(join(tmpdir(), "gpc-ds-"));
+    const filePath = join(tmpDir, "empty.csv");
+
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(filePath, "", "utf-8");
+
+    await expect(importDataSafety(client, "com.example", filePath)).rejects.toThrow(
+      "Data safety CSV is empty",
+    );
+
+    await rm(tmpDir, { recursive: true });
+  });
 });
 
 // ---------------------------------------------------------------------------
