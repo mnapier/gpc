@@ -1098,10 +1098,7 @@ export function createApiClient(options: ApiClientOptions): PlayApiClient {
 
     dataSafety: {
       async update(packageName, body) {
-        const { data } = await http.post<DataSafetyResponse>(
-          `/${p(packageName)}/dataSafety`,
-          body,
-        );
+        const { data } = await http.post<DataSafetyResponse>(`/${p(packageName)}/dataSafety`, body);
         return data;
       },
     },

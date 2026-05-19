@@ -4694,8 +4694,7 @@ describe("diffListings – edge cases", () => {
 import { updateDataSafety, importDataSafety } from "../src/commands/data-safety.js";
 
 describe("data-safety commands", () => {
-  const sampleCsv =
-    "Question ID,Response,Response value\nPSL_DATA_TYPES_PERSONAL,PSL_NAME,TRUE\n";
+  const sampleCsv = "Question ID,Response,Response value\nPSL_DATA_TYPES_PERSONAL,PSL_NAME,TRUE\n";
   const sampleRequest = { safetyLabels: sampleCsv };
 
   function mockClient(): any {

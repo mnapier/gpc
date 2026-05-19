@@ -11,11 +11,11 @@ outline: deep
 
 ## Commands
 
-| Command                                     | Description                                       |
-| ------------------------------------------- | ------------------------------------------------- |
-| [`data-safety update`](#data-safety-update) | Update declarations from a CSV file               |
-| [`data-safety get`](#data-safety-get)       | Not available (no API endpoint)                   |
-| [`data-safety export`](#data-safety-export) | Not available (no API endpoint)                   |
+| Command                                     | Description                         |
+| ------------------------------------------- | ----------------------------------- |
+| [`data-safety update`](#data-safety-update) | Update declarations from a CSV file |
+| [`data-safety get`](#data-safety-get)       | Not available (no API endpoint)     |
+| [`data-safety export`](#data-safety-export) | Not available (no API endpoint)     |
 
 ## `data-safety update`
 
@@ -29,11 +29,11 @@ gpc data-safety update --file <path> [options]
 
 ### Options
 
-| Flag     | Short | Type     | Default        | Description                                     |
-| -------- | ----- | -------- | -------------- | ----------------------------------------------- |
+| Flag     | Short | Type     | Default        | Description                                        |
+| -------- | ----- | -------- | -------------- | -------------------------------------------------- |
 | `--file` |       | `string` | **(required)** | Path to data safety CSV file (Play Console format) |
-| `--app`  |       | `string` |                | App package name                                |
-| `--json` |       | `flag`   |                | Output as JSON                                  |
+| `--app`  |       | `string` |                | App package name                                   |
+| `--json` |       | `flag`   |                | Output as JSON                                     |
 
 ### Workflow
 
@@ -82,12 +82,12 @@ The exported CSV can then be version-controlled and re-applied with `data-safety
 
 ## Errors
 
-| Code             | Exit | Description                                     |
-| ---------------- | ---- | ----------------------------------------------- |
-| `FILE_NOT_FOUND` | 1    | The specified CSV file does not exist            |
-| `INVALID_INPUT`  | 1    | The CSV file is empty                            |
+| Code             | Exit | Description                                                    |
+| ---------------- | ---- | -------------------------------------------------------------- |
+| `FILE_NOT_FOUND` | 1    | The specified CSV file does not exist                          |
+| `INVALID_INPUT`  | 1    | The CSV file is empty                                          |
 | `FILE_TOO_LARGE` | 1    | The CSV exceeds 1 MB (data safety CSVs are typically a few KB) |
-| `API_ERROR`      | 4    | Google Play API rejected the update              |
+| `API_ERROR`      | 4    | Google Play API rejected the update                            |
 
 ## Related
 
