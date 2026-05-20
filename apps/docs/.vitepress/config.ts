@@ -765,13 +765,15 @@ export default defineConfig({
     if (pageData.relativePath.startsWith("blog/") && pageData.relativePath !== "blog/index.md") {
       const fm = pageData.frontmatter;
       const dateStr = fm.date ? new Date(fm.date).toISOString().slice(0, 10) : "";
+      const modifiedStr = pageData.lastUpdated
+        ? new Date(pageData.lastUpdated).toISOString().slice(0, 10)
+        : dateStr;
       const blogSchema = {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         headline: pageData.title ?? fm.title ?? "",
         description: desc,
-        datePublished: dateStr,
-        dateModified: dateStr,
+        ...(dateStr ? { datePublished: dateStr, dateModified: modifiedStr } : {}),
         author: {
           "@type": "Person",
           name: fm.author ?? "Yasser Berrehail",
