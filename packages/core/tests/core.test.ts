@@ -2758,7 +2758,7 @@ describe("purchases commands", () => {
         consumeProduct: vi.fn().mockResolvedValue(undefined),
         getSubscriptionV2: vi
           .fn()
-          .mockResolvedValue({ subscriptionState: "ACTIVE", lineItems: [] }),
+          .mockResolvedValue({ subscriptionState: "ACTIVE", lineItems: [], etag: "test-etag" }),
         getSubscriptionV1: vi.fn().mockResolvedValue({
           expiryTimeMillis: "100000",
           orderId: "o1",
@@ -2769,7 +2769,9 @@ describe("purchases commands", () => {
         deferSubscription: vi.fn().mockResolvedValue({ newExpiryTimeMillis: "200000" }),
         revokeSubscriptionV2: vi.fn().mockResolvedValue(undefined),
         cancelSubscriptionV2: vi.fn().mockResolvedValue(undefined),
-        deferSubscriptionV2: vi.fn().mockResolvedValue({ newExpiryTime: "2026-07-01T00:00:00Z" }),
+        deferSubscriptionV2: vi.fn().mockResolvedValue({
+          itemExpiryTimeDetails: [{ productId: "premium", expiryTime: "2026-07-01T00:00:00Z" }],
+        }),
         getProductV2: vi
           .fn()
           .mockResolvedValue({ orderId: "o2", purchaseStateContext: { state: "PURCHASED" } }),
@@ -2903,12 +2905,13 @@ describe("purchases commands", () => {
       client,
       "com.example",
       "tok123",
-      "2026-07-01T00:00:00Z",
+      "2592000s",
     );
+    expect(client.purchases.getSubscriptionV2).toHaveBeenCalledWith("com.example", "tok123");
     expect(client.purchases.deferSubscriptionV2).toHaveBeenCalledWith("com.example", "tok123", {
-      deferralInfo: { desiredExpiryTime: "2026-07-01T00:00:00Z" },
+      deferralContext: { etag: "test-etag", deferDuration: "2592000s" },
     });
-    expect(result.newExpiryTime).toBe("2026-07-01T00:00:00Z");
+    expect(result.itemExpiryTimeDetails[0].expiryTime).toBe("2026-07-01T00:00:00Z");
   });
 });
 

@@ -206,10 +206,13 @@ export async function deferSubscriptionV2(
   client: PlayApiClient,
   packageName: string,
   token: string,
-  desiredExpiryTime: string,
+  deferDuration: string,
+  etag?: string,
 ): Promise<SubscriptionsV2DeferResponse> {
   validatePackageName(packageName);
+  const resolvedEtag =
+    etag ?? (await client.purchases.getSubscriptionV2(packageName, token)).etag ?? "";
   return client.purchases.deferSubscriptionV2(packageName, token, {
-    deferralInfo: { desiredExpiryTime },
+    deferralContext: { etag: resolvedEtag, deferDuration },
   });
 }

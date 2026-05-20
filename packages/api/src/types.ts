@@ -730,20 +730,16 @@ export interface RevokeSubscriptionV2Request {
   };
 }
 
-/**
- * Request body for purchases.subscriptionsv2.defer.
- * For subscriptions with add-ons, the billing date of all line items is
- * deferred together server-side — no per-line-item field is required in
- * the request. (Jan 2026)
- */
 export interface SubscriptionsV2DeferRequest {
-  deferralInfo: {
-    desiredExpiryTime: string;
+  deferralContext: {
+    etag: string;
+    deferDuration: string;
+    validateOnly?: boolean;
   };
 }
 
 export interface SubscriptionsV2DeferResponse {
-  newExpiryTime: string;
+  itemExpiryTimeDetails: { productId: string; expiryTime: string }[];
 }
 
 export interface ConvertRegionPricesRequest {

@@ -484,13 +484,14 @@ export function registerPurchasesCommands(program: Command): void {
 
   sub
     .command("defer-v2 <token>")
-    .description("Defer a subscription renewal (v2 — supports add-on subscriptions)")
-    .requiredOption("--until <date>", "Desired expiry time (ISO 8601 date)")
-    .action(async (token: string, options: { until: string }) => {
+    .description("Defer a subscription renewal (v2 -- supports add-on subscriptions)")
+    .requiredOption("--duration <seconds>", "Duration to defer by (e.g. '2592000s' for 30 days)")
+    .option("--etag <etag>", "Subscription etag (fetched automatically if omitted)")
+    .action(async (token: string, options: { duration: string; etag?: string }) => {
       const config = await loadConfig();
       const packageName = resolvePackageName(program.opts()["app"], config);
 
-      await requireConfirm(`Defer subscription renewal to ${options.until}?`, program);
+      await requireConfirm(`Defer subscription renewal by ${options.duration}?`, program);
 
       if (isDryRun(program)) {
         const format = getOutputFormat(program, config);
@@ -499,7 +500,7 @@ export function registerPurchasesCommands(program: Command): void {
             command: "purchases subscription defer-v2",
             action: "defer",
             target: token.slice(0, 16) + "...",
-            details: { desiredExpiryTime: options.until },
+            details: { deferDuration: options.duration },
           },
           format,
           formatOutput,
@@ -509,7 +510,11 @@ export function registerPurchasesCommands(program: Command): void {
 
       const client = await getClient(config);
 
-      const result = await deferSubscriptionV2(client, packageName, token, options.until);
-      console.log(`Subscription deferred. New expiry: ${result.newExpiryTime}`);
+      const result = await deferSubscriptionV2(
+        client, packageName, token, options.duration, options.etag,
+      );
+      for (const item of result.itemExpiryTimeDetails) {
+        console.log(`${item.productId}: new expiry ${item.expiryTime}`);
+      }
     });
 }

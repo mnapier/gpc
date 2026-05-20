@@ -1258,15 +1258,18 @@ describe("monetization API endpoints", () => {
     });
 
     it("deferSubscriptionV2 calls POST /{pkg}/purchases/subscriptionsv2/tokens/{token}:defer", async () => {
-      mockFetch.mockResolvedValueOnce(mockResponse({ newExpiryTime: "2026-07-01T00:00:00Z" }));
+      const resp = {
+        itemExpiryTimeDetails: [{ productId: "premium_monthly", expiryTime: "2026-07-01T00:00:00Z" }],
+      };
+      mockFetch.mockResolvedValueOnce(mockResponse(resp));
       const client = makeClient();
       const result = await client.purchases.deferSubscriptionV2(PKG, "tok123", {
-        deferralInfo: { desiredExpiryTime: "2026-07-01T00:00:00Z" },
+        deferralContext: { etag: "abc123", deferDuration: "2592000s" },
       });
       const [url, init] = mockFetch.mock.calls[0];
       expect(url).toBe(`${BASE_URL}/${PKG}/purchases/subscriptionsv2/tokens/tok123:defer`);
       expect(init.method).toBe("POST");
-      expect(result.newExpiryTime).toBe("2026-07-01T00:00:00Z");
+      expect(result.itemExpiryTimeDetails[0].expiryTime).toBe("2026-07-01T00:00:00Z");
     });
   });
 
