@@ -1090,6 +1090,32 @@ describe("monetization API endpoints", () => {
       expect(url).toBe(`${BASE_URL}/${PKG}/purchases/subscriptionsv2/tokens/tok456`);
     });
 
+    it("getSubscriptionV2 returns onHoldStateContext when subscription is ON_HOLD", async () => {
+      const sub = {
+        kind: "androidpublisher#subscriptionPurchaseV2",
+        subscriptionState: "SUBSCRIPTION_STATE_ON_HOLD",
+        lineItems: [],
+        onHoldStateContext: { pendingOrderId: "GPA.1234-5678" },
+      };
+      mockFetch.mockResolvedValueOnce(mockResponse(sub));
+      const client = makeClient();
+      const result = await client.purchases.getSubscriptionV2(PKG, "tok-hold");
+      expect(result.onHoldStateContext).toEqual({ pendingOrderId: "GPA.1234-5678" });
+    });
+
+    it("getSubscriptionV2 returns inGracePeriodStateContext when subscription is IN_GRACE_PERIOD", async () => {
+      const sub = {
+        kind: "androidpublisher#subscriptionPurchaseV2",
+        subscriptionState: "SUBSCRIPTION_STATE_IN_GRACE_PERIOD",
+        lineItems: [],
+        inGracePeriodStateContext: { failedOrderId: "GPA.9876-5432" },
+      };
+      mockFetch.mockResolvedValueOnce(mockResponse(sub));
+      const client = makeClient();
+      const result = await client.purchases.getSubscriptionV2(PKG, "tok-grace");
+      expect(result.inGracePeriodStateContext).toEqual({ failedOrderId: "GPA.9876-5432" });
+    });
+
     it("cancelSubscription calls POST .../:cancel", async () => {
       mockFetch.mockResolvedValueOnce(mockResponse({}));
       const client = makeClient();

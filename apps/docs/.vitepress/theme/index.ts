@@ -7,6 +7,8 @@ import CommandHeader from "./CommandHeader.vue";
 import BackToTop from "./BackToTop.vue";
 import CopyForAI from "./CopyForAI.vue";
 import AnnouncementBanner from "./AnnouncementBanner.vue";
+import BlogIndex from "./BlogIndex.vue";
+import BlogPost from "./BlogPost.vue";
 
 export default {
   ...DefaultTheme,
@@ -18,5 +20,7 @@ export default {
     app.component("BackToTop", BackToTop);
     app.component("CopyForAI", CopyForAI);
     app.component("AnnouncementBanner", AnnouncementBanner);
+    app.component("BlogIndex", BlogIndex);
+    app.component("BlogPost", BlogPost);
   },
 };

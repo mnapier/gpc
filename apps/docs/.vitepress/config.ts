@@ -275,6 +275,11 @@ function getPageDescription(page: PageData): string {
       "What is the Google Play edit lifecycle? The atomic session model for Play Developer API mutations. How GPC handles open, commit, and discard under the hood.",
     "glossary/fastlane-metadata-format.md":
       "What is the Fastlane metadata format? The directory convention Fastlane supply uses for Play Store listings. GPC reads and writes the same format via gpc listings push and pull.",
+    // Blog
+    "blog/index.md":
+      "GPC blog: updates, guides, and analysis for Android developers shipping to Google Play from the command line.",
+    "blog/google-io-2026-what-changed.md":
+      "Google I/O 2026 impact on Android developer tools. Android CLI 1.0 stable, AI Studio internal-track publishing, Play Developer API changes, and what it means for GPC.",
   };
   return map[path] ?? `GPC documentation — ${page.title ?? "Google Play Console CLI"}`;
 }
@@ -343,7 +348,7 @@ export default defineConfig({
         codeRepository: "https://github.com/yasserstudio/gpc",
 
         programmingLanguage: "TypeScript",
-        softwareVersion: "0.9.74",
+        softwareVersion: "0.9.76",
         releaseNotes: "https://yasserstudio.github.io/gpc/reference/changelog",
         documentation: "https://yasserstudio.github.io/gpc/",
         author: {
@@ -753,6 +758,53 @@ export default defineConfig({
       ]);
     }
 
+    // BlogPosting schema on blog posts
+    if (pageData.relativePath.startsWith("blog/") && pageData.relativePath !== "blog/index.md") {
+      const fm = pageData.frontmatter;
+      const dateStr = fm.date ? new Date(fm.date).toISOString().slice(0, 10) : "";
+      const blogSchema = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: pageData.title ?? fm.title ?? "",
+        description: desc,
+        datePublished: dateStr,
+        dateModified: dateStr,
+        author: {
+          "@type": "Person",
+          name: fm.author ?? "Yasser Berrehail",
+          url: "https://yasser.studio",
+        },
+        publisher: {
+          "@type": "Person",
+          name: "Yasser Berrehail",
+          url: "https://yasser.studio",
+        },
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": canonicalUrl,
+        },
+        ...(fm.tags ? { keywords: (fm.tags as string[]).join(", ") } : {}),
+      };
+      pageData.frontmatter.head.push(
+        ["script", { type: "application/ld+json" }, JSON.stringify(blogSchema)],
+        ["meta", { property: "og:type", content: "article" }],
+        ["meta", { property: "article:published_time", content: dateStr }],
+        [
+          "meta",
+          { property: "article:author", content: fm.author ?? "Yasser Berrehail" },
+        ],
+        ...(fm.tags
+          ? (fm.tags as string[]).map(
+              (tag: string) =>
+                ["meta", { property: "article:tag", content: tag }] as [
+                  string,
+                  Record<string, string>,
+                ],
+            )
+          : []),
+      );
+    }
+
     // HowTo schema on tutorial pages
     const howToByPath: Record<
       string,
@@ -923,6 +975,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/" },
       { text: "Commands", link: "/commands/" },
       { text: "CI/CD", link: "/ci-cd/" },
+      { text: "Blog", link: "/blog/" },
       {
         text: "Changelogs",
         items: [
@@ -1187,6 +1240,16 @@ export default defineConfig({
             { text: "API Deprecations", link: "/reference/deprecations" },
             { text: "Rate Limits", link: "/reference/rate-limits" },
             { text: "Changelog", link: "/reference/changelog" },
+          ],
+        },
+      ],
+
+      "/blog/": [
+        {
+          text: si(ICONS.bookOpen, "Blog"),
+          items: [
+            { text: "All Posts", link: "/blog/" },
+            { text: "Google I/O 2026", link: "/blog/google-io-2026-what-changed" },
           ],
         },
       ],
