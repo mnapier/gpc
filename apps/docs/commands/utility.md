@@ -231,9 +231,9 @@ gpc update --check --output json | jq '.updateAvailable'
 **Update available:**
 
 ```
-Update available: 0.9.65 → 0.9.66
+Update available: 0.9.75 → 0.9.76
 Install method: homebrew
-Release: https://github.com/yasserstudio/gpc/releases/tag/v0.9.66
+Release: https://github.com/yasserstudio/gpc/releases/tag/v0.9.76
 
 Run: gpc update
 ```
@@ -241,18 +241,18 @@ Run: gpc update
 **Already on latest:**
 
 ```
-Already on latest version: v0.9.66
+Already on latest version: v0.9.76
 ```
 
 **`--output json` (update available):**
 
 ```json
 {
-  "current": "0.9.31",
-  "latest": "0.9.32",
+  "current": "0.9.75",
+  "latest": "0.9.76",
   "updateAvailable": true,
   "installMethod": "homebrew",
-  "releaseUrl": "https://github.com/yasserstudio/gpc/releases/tag/v0.9.32"
+  "releaseUrl": "https://github.com/yasserstudio/gpc/releases/tag/v0.9.76"
 }
 ```
 
@@ -366,14 +366,14 @@ gpc version [--json]
 
 ```bash
 gpc version
-# v0.9.32
+# v0.9.76
 
 gpc version --json
 ```
 
 ```json
 {
-  "version": "0.9.32",
+  "version": "0.9.76",
   "installMethod": "homebrew",
   "platform": "darwin-arm64",
   "node": "22.12.0"

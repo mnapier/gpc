@@ -36,6 +36,9 @@ Google I/O 2026 response: API parity, docs alignment, blog launch.
   - Medium: ProductPurchase/SubscriptionPurchase v1 missing fields, pagination support, latencyTolerance on activate/deactivate, externaltransactions.create query param
 - fix(cli): `gpc purchases orders refund` now uses `--revoke` flag (removed non-existent `--full-refund`/`--prorated-refund`)
 - fix(cli): `gpc external-transactions create` now requires `--transaction-id`
+- docs: landing page streamlined (10 sections to 6, coverage grid 12 to 9 cards)
+- docs: navigation reduced from 8 to 5 top-level items
+- docs: added sidebar navigation for glossary, alternatives, users, and migration pages
 
 **Tests:** 2,313 (+3 net).
 
