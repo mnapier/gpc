@@ -546,15 +546,13 @@ export interface SubscriptionPurchaseV2 {
     obfuscatedExternalProfileId?: string;
   };
   pausedStateContext?: { autoResumeTime?: string };
-  /** On-hold details: pending/failed order when payment declines at renewal. (May 2026) */
+  /** On-hold details when payment declines at renewal. (May 2026) */
   onHoldStateContext?: {
-    pendingOrderId?: string;
-    failedOrderId?: string;
+    renewalDeclined?: { pendingOrderId?: string };
   };
-  /** Grace period details: pending/failed order during grace period retry window. (May 2026) */
+  /** Grace period details during retry window after payment decline. (May 2026) */
   inGracePeriodStateContext?: {
-    pendingOrderId?: string;
-    failedOrderId?: string;
+    renewalDeclined?: { pendingOrderId?: string };
   };
   subscribeWithGoogleInfo?: {
     profileName?: string;

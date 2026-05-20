@@ -172,8 +172,8 @@ Google extended the account recovery window from **30 to 60 days** for failed pa
 
 Two new fields on `SubscriptionPurchaseV2` (added in GPC v0.9.76) give visibility into payment failures:
 
-- **`onHoldStateContext`** -- present when `subscriptionState` is `SUBSCRIPTION_STATE_ON_HOLD`. Contains the pending or failed order ID from the declined renewal.
-- **`inGracePeriodStateContext`** -- present when `subscriptionState` is `SUBSCRIPTION_STATE_IN_GRACE_PERIOD`. Contains the pending or failed order ID during the retry window.
+- **`onHoldStateContext`** -- present when `subscriptionState` is `SUBSCRIPTION_STATE_ON_HOLD`. Contains `renewalDeclined.pendingOrderId` from the declined renewal.
+- **`inGracePeriodStateContext`** -- present when `subscriptionState` is `SUBSCRIPTION_STATE_IN_GRACE_PERIOD`. Contains `renewalDeclined.pendingOrderId` during the retry window.
 
 A new delayed charging optimization lets low-risk users keep access while payment retries happen in the background. No GPC configuration changes needed.
 :::

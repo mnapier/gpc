@@ -57,10 +57,10 @@ Google launched Antigravity 2.0 as a standalone agent orchestration platform wit
 
 Google added two new fields to `SubscriptionPurchaseV2`:
 
-- **`onHoldStateContext`** -- provides the pending or failed order ID when a subscription enters `ON_HOLD` due to a declined renewal payment
-- **`inGracePeriodStateContext`** -- provides the pending or failed order ID during the grace period retry window
+- **`onHoldStateContext`** -- contains `renewalDeclined.pendingOrderId` when a subscription enters `ON_HOLD` due to a declined renewal payment
+- **`inGracePeriodStateContext`** -- contains `renewalDeclined.pendingOrderId` during the grace period retry window
 
-These fields give developers visibility into why a subscription payment failed and which order triggered the state change. GPC v0.9.76 adds both fields to the typed API client.
+These fields give developers visibility into why a subscription payment failed and which order triggered the state change. Combined with the extended account recovery window (30 to 60 days), they enable better involuntary churn recovery workflows. GPC v0.9.76 adds both fields to the typed API client.
 
 ```bash
 # Get subscription with new state context fields

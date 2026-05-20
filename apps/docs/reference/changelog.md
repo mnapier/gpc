@@ -15,8 +15,10 @@ All notable user-facing changes to GPC are documented here. For full release det
 
 Google I/O 2026 response: API parity, docs alignment, blog launch.
 
-- feat(api): add `onHoldStateContext` and `inGracePeriodStateContext` to `SubscriptionPurchaseV2` (May 2026 Play Developer API fields)
-- docs: May 2026 deprecation wave (cancel, defer, acknowledge now deprecated)
+- feat(api): add `onHoldStateContext` and `inGracePeriodStateContext` to `SubscriptionPurchaseV2` with `renewalDeclined.pendingOrderId` structure (May 2026 Play Developer API)
+- fix(api): remove premature DEP004 warning on `acknowledgeSubscription` (not deprecated per Google)
+- fix(api): correct cancel/defer deprecation shutdown date (Aug 2028, not 2027)
+- docs: May 2026 deprecation wave (cancel, defer, `offer_phase` field -- shutdown Aug 2028)
 - docs: alternatives page updated for Android CLI 1.0 stable and AI Studio
 - docs: Android 17 (API 37) awareness notes on preflight pages
 - docs: subscription recovery tip (30 to 60 day window)
