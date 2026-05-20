@@ -525,8 +525,11 @@ export interface SubscriptionPurchaseV2 {
   lineItems: SubscriptionPurchaseLineItem[];
   startTime?: string;
   subscriptionState: SubscriptionState;
+  /** @deprecated Use lineItems[].latestSuccessfulOrderId instead. */
+  latestOrderId?: string;
   acknowledgementState?: string;
   linkedPurchaseToken?: string;
+  etag?: string;
   /** Resubscription context when purchase originates from Play Store. (Nov 2025) */
   outOfAppPurchaseContext?: { externalTransactionToken?: string };
   /** Cancellation details: reason, survey result, time. */
@@ -574,21 +577,21 @@ export interface SubscriptionPurchaseLineItem {
       priceChangeState?: string;
       expectedNewPriceChargeTime?: string;
     };
-    /** Price step-up consent details. (Sep 2025) */
     priceStepUpConsentDetails?: {
       consentStatus?: string;
       lastConsentTime?: string;
     };
+    installmentDetails?: Record<string, unknown>;
   };
+  prepaidPlan?: { allowExtendAfterTime?: string };
   offerDetails?: { basePlanId?: string; offerId?: string; offerTags?: string[] };
-  /** Replaces deprecated latestOrderId. (May 2025) */
   latestSuccessfulOrderId?: string;
-  /** Details about item being replaced, if applicable. (Nov 2025) */
   itemReplacement?: {
     productId?: string;
     offerDetails?: { basePlanId?: string; offerId?: string };
   };
-  /** Current offer phase (union field — exactly one set). (Jan 2026) */
+  deferredItemReplacement?: { productId?: string };
+  signupPromotion?: { promotionType?: string; promotionCode?: string };
   offerPhase?: {
     basePrice?: Record<string, unknown>;
     freeTrial?: Record<string, unknown>;
