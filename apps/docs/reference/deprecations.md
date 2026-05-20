@@ -28,7 +28,7 @@ Google deprecated several subscription-related APIs on **May 21, 2025**, with sh
 | ---------------------------------------------------------- | ---------------------------------------- |
 | `gpc purchases subscription get <subscription-id> <token>` | `gpc purchases subscription get <token>` |
 
-GPC's `getSubscriptionV2` (used by `gpc purchases subscription get`) already uses the v2 endpoint. The v1 `getSubscriptionV1` method emits a deprecation warning.
+GPC's `getSubscriptionV2` (used by `gpc purchases subscription get`) already uses the v2 endpoint. The v1 `getSubscriptionV1` method emits a deprecation warning (`GPC_DEP001`).
 
 ### `purchases.subscriptions.refund` (v1)
 
@@ -71,7 +71,7 @@ Google announced a second deprecation wave at I/O 2026 (May 19, 2026), continuin
 | `purchases.subscriptions:cancel`      | `gpc purchases subscription cancel`      | `GPC_DEP002`     | Deprecated |
 | `purchases.subscriptions:defer`       | `gpc purchases subscription defer`       | `GPC_DEP003`     | Deprecated |
 
-GPC already emits deprecation warnings on these methods and provides v2 alternatives (`cancelSubscriptionV2`, `deferSubscriptionV2`). No code changes needed in your GPC workflows.
+GPC already emits deprecation warnings on all three methods. `cancelSubscriptionV2` and `deferSubscriptionV2` are the v2 replacements for cancel and defer. `acknowledge` has no direct v2 replacement; see Google's migration guidance. No code changes needed in your GPC workflows.
 
 ## V2 Field Mapping
 

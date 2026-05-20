@@ -6,7 +6,7 @@ outline: deep
 
 A **Google Play CLI tool** is a command-line interface that wraps the Google Play Developer API, letting you manage Android app releases, metadata, and monitoring from your terminal or CI/CD pipeline instead of the Play Console web UI. Several tools exist, each with different language runtimes, API coverage, and feature sets.
 
-This page compares every actively maintained option as of April 2026.
+This page compares every actively maintained option as of May 2026.
 
 ## At a Glance
 
