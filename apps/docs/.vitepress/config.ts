@@ -1,6 +1,7 @@
 import { defineConfig, type PageData } from "vitepress";
 
-const safeJsonLd = (v: unknown): string => JSON.stringify(v).replace(/</g, "\\u003c");
+const safeJsonLd = (v: unknown): string =>
+  JSON.stringify(v).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
 
 // ── Sidebar icon helpers ─────────────────────────────────────────
 const svg = (body: string) =>
@@ -330,7 +331,7 @@ export default defineConfig({
     [
       "script",
       { type: "application/ld+json" },
-      JSON.stringify({
+      safeJsonLd({
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         name: "GPC — Google Play Console CLI",
@@ -368,7 +369,7 @@ export default defineConfig({
     [
       "script",
       { type: "application/ld+json" },
-      JSON.stringify({
+      safeJsonLd({
         "@context": "https://schema.org",
         "@type": "WebSite",
         name: "GPC Documentation",
@@ -504,7 +505,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify(faqSchema),
+        safeJsonLd(faqSchema),
       ]);
     }
 
@@ -559,7 +560,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify(fastlaneFaqSchema),
+        safeJsonLd(fastlaneFaqSchema),
       ]);
     }
 
@@ -598,7 +599,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify(troubleshootingFaqSchema),
+        safeJsonLd(troubleshootingFaqSchema),
       ]);
     }
 
@@ -645,7 +646,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify(altIndexFaqSchema),
+        safeJsonLd(altIndexFaqSchema),
       ]);
     }
 
@@ -701,7 +702,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify(androidCliFaqSchema),
+        safeJsonLd(androidCliFaqSchema),
       ]);
     }
 
@@ -756,7 +757,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify(migrationFaqSchema),
+        safeJsonLd(migrationFaqSchema),
       ]);
     }
 
@@ -911,7 +912,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify({
+        safeJsonLd({
           "@context": "https://schema.org",
           "@type": "HowTo",
           name: howToEntry.name,
@@ -945,7 +946,7 @@ export default defineConfig({
       pageData.frontmatter.head.push([
         "script",
         { type: "application/ld+json" },
-        JSON.stringify({
+        safeJsonLd({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: breadcrumbs,
