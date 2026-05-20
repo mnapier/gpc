@@ -72,6 +72,12 @@ Flags the `AndroidManifest.xml` configurations that cause the fastest rejections
 - `QUERY_ALL_PACKAGES` permission — **error**. Requires declared justification; rarely approved.
 - Geofencing foreground service (April 2026 policy) — **warning**. Flags services with `foregroundServiceType="location"` combined with `ACCESS_BACKGROUND_LOCATION`. Google removed geofencing as an approved foreground service use case; compliance deadline is May 15, 2026. Suppress via `.preflightrc.json` if your app uses legitimate background location tracking.
 
+::: info Android 17 (API 37) -- Heads Up
+Android 17 reaches stable in June 2026. Apps targeting API 37 will have `screenOrientation`, `resizeableActivity`, `minAspectRatio`, and `maxAspectRatio` ignored on displays wider than 600dp (no opt-out). Background audio will require `MediaSessionService` (Media3 1.10+). A new `ACCESS_LOCAL_NETWORK` permission is required for mDNS, raw sockets, and device discovery.
+
+No preflight scanner changes yet. GPC will add a manifest check for large-screen resizability when the target SDK deadline is announced.
+:::
+
 ### 2. Permissions
 
 18 restricted permissions that require Play Console declaration or restricted-use approval:

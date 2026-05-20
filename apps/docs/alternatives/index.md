@@ -67,11 +67,13 @@ Fastlane supply has a few features GPC does not have yet:
 - **Gradle-native workflow** - Publishing is a Gradle task, not a separate CLI step. If your CI already runs `./gradlew`, this is zero additional setup.
 - **Upload progress callbacks** - Shows upload percentage during large AAB uploads.
 
-## A Note on Google's Official Android CLI
+## A Note on Google's Developer Tools
 
-Google [shipped an official Android CLI on 2026-04-16](https://android-developers.googleblog.com/2026/04/build-android-apps-3x-faster-using-any-agent.html). It is **not an alternative to GPC**. Its scope is SDK management, project scaffolding, emulator control, and on-device deployment. It does not cover Play Store publishing, releases, vitals, reviews, subscriptions, or listings.
+Google [shipped the Android CLI on 2026-04-16](https://android-developers.googleblog.com/2026/04/build-android-apps-3x-faster-using-any-agent.html) and promoted it to **stable (1.0) at Google I/O on 2026-05-19**. It is **not an alternative to GPC**. Its scope is SDK management, project scaffolding, emulator control, Compose preview, and on-device deployment. It supports Claude Code, OpenAI Codex, and Google Antigravity as agent hosts.
 
-GPC is the complementary publishing half. A full agent-driven workflow looks like `android create` then `android run` then `gpc preflight` then `gpc publish`.
+At I/O 2026, Google also launched **AI Studio internal-track publishing** -- a single-click deploy from prompt-generated apps to the Internal Testing Track. This covers prototyping only: no production releases, no staged rollouts, no metadata management, no CI/CD. Most developers build with Android Studio and Gradle, not AI Studio.
+
+Neither tool covers production publishing from the command line. GPC is the complementary publishing half. A full agent-driven workflow looks like `android create` then `android run` then `gpc preflight` then `gpc publish`.
 
 See [Using GPC with Google's Android CLI](/guide/android-cli-interop) for the end-to-end workflow.
 

@@ -61,17 +61,17 @@ GPC's `SubscriptionPurchaseV2` type already includes `latestSuccessfulOrderId` o
 
 **Status:** Deprecated — use `SUBSCRIPTION_PRICE_CHANGE_UPDATED` instead.
 
-## NOT Deprecated
+## May 2026 Deprecation Wave
 
-The following v1 subscription management APIs are **not deprecated** and continue to work:
+Google announced a second deprecation wave at I/O 2026 (May 19, 2026), continuing the v1-to-v2 subscription migration. The remaining v1 management endpoints are now officially deprecated:
 
-| API                                   | GPC Command                              | Status |
-| ------------------------------------- | ---------------------------------------- | ------ |
-| `purchases.subscriptions:acknowledge` | `gpc purchases subscription acknowledge` | Active |
-| `purchases.subscriptions:cancel`      | `gpc purchases subscription cancel`      | Active |
-| `purchases.subscriptions:defer`       | `gpc purchases subscription defer`       | Active |
+| API                                   | GPC Command                              | GPC Warning Code | Status     |
+| ------------------------------------- | ---------------------------------------- | ---------------- | ---------- |
+| `purchases.subscriptions:acknowledge` | `gpc purchases subscription acknowledge` | `GPC_DEP004`     | Deprecated |
+| `purchases.subscriptions:cancel`      | `gpc purchases subscription cancel`      | `GPC_DEP002`     | Deprecated |
+| `purchases.subscriptions:defer`       | `gpc purchases subscription defer`       | `GPC_DEP003`     | Deprecated |
 
-These remain on the `purchases.subscriptions` endpoint. Google has not announced deprecation dates for these methods.
+GPC already emits deprecation warnings on these methods and provides v2 alternatives (`cancelSubscriptionV2`, `deferSubscriptionV2`). No code changes needed in your GPC workflows.
 
 ## V2 Field Mapping
 
@@ -108,6 +108,8 @@ Key field changes between `SubscriptionPurchase` (v1) and `SubscriptionPurchaseV
 | `lineItems[].offerDetails.offerTags`  | Tags attached to the offer                                    |
 | `pausedStateContext`                  | Present when `SUBSCRIPTION_STATE_PAUSED`                      |
 | `canceledStateContext`                | Present when `SUBSCRIPTION_STATE_CANCELED`                    |
+| `onHoldStateContext`                  | Present when `SUBSCRIPTION_STATE_ON_HOLD` (May 2026)          |
+| `inGracePeriodStateContext`           | Present when `SUBSCRIPTION_STATE_IN_GRACE_PERIOD` (May 2026)  |
 | `testPurchase`                        | Present for licensed tester purchases                         |
 
 ## What GPC Users Should Do

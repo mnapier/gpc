@@ -4,47 +4,69 @@ outline: deep
 
 # Using GPC with Google's Android CLI
 
-Google [shipped the official Android CLI on 2026-04-16](https://android-developers.googleblog.com/2026/04/build-android-apps-3x-faster-using-any-agent.html). It covers the build-and-device half of Android development. GPC covers the Play Store half. This page documents how to use them together in an agent-driven workflow.
+Google [shipped the official Android CLI on 2026-04-16](https://android-developers.googleblog.com/2026/04/build-android-apps-3x-faster-using-any-agent.html) and promoted it to **stable (1.0) at Google I/O on 2026-05-19**. It covers the build-and-device half of Android development. GPC covers the Play Store half. This page documents how to use them together in an agent-driven workflow.
 
-## What each CLI covers
+## What each tool covers
 
-Google's announcement defines the Android CLI's scope explicitly:
+Google's Android ecosystem now includes three developer-facing tools. Each has a distinct scope:
 
-> "environment setup, project creation, and device management"
+### Android CLI (stable, I/O 2026)
 
-Concretely, the commands shipping today are:
+- `android sdk install` -- download SDK components
+- `android create` -- scaffold a project from official templates
+- `android emulator` -- create and manage virtual devices
+- `android run` -- build and deploy to a device
+- `android studio` -- semantic symbol resolution, Compose preview rendering, lint analysis
+- `android update` -- update the CLI
+- `android docs` -- search the Android Knowledge Base
+- `android skills` -- browse and apply agent skills (Journeys for end-to-end UI testing)
 
-- `android sdk install` — download SDK components
-- `android create` — scaffold a project from official templates
-- `android emulator` — create and manage virtual devices
-- `android run` — build and deploy to a device
-- `android update` — update the CLI
-- `android docs` — search the Android Knowledge Base
-- `android skills` — browse and apply agent skills
+Supported agents: Claude Code, OpenAI Codex, Google Antigravity.
 
-What the Android CLI does **not** cover:
+### Google AI Studio (I/O 2026)
 
-- Play Store publishing and releases
-- Track management and rollouts
-- Store listings, screenshots, and metadata
-- Vitals (crash rate, ANR, startup time)
+- Generate native Kotlin/Compose apps from text prompts
+- In-browser Android emulator for previewing
+- **Single-click publish to Google Play's Internal Testing Track** (creates app record, packages bundle, uploads)
+- Export to Android Studio or Antigravity for further development
+
+Current limitations: internal test track only (not production), apps intended for personal use, no Firebase integration yet.
+
+### What neither tool covers
+
+- Production releases and track promotion
+- Staged rollouts with vitals gating
+- Store listings, screenshots, and metadata sync
+- Vitals monitoring (crash rate, ANR, startup time, LMK)
 - Reviews and reporting
-- Subscriptions, IAP, pricing
+- Subscriptions, IAP, pricing management
 - Pre-submission compliance scanning
+- CI/CD pipeline integration
 
 That entire surface is what GPC handles. 217 typed endpoints across the Android Publisher API, the Play Developer Reporting API, and the Play Custom App Publishing API.
 
+## Where GPC fits
+
+The standard Android workflow is: build your app, then publish it. GPC handles the second half.
+
+| Stage | Tool | What happens |
+|-------|------|-------------|
+| **Build** | Android CLI, Android Studio, Gradle | Scaffold, build, test, debug |
+| **Publish** | GPC | Production releases, staged rollouts, metadata, vitals, monetization, CI/CD |
+
+Google AI Studio adds an alternative on-ramp for prototyping: generate an app from a prompt and deploy it to the Internal Testing Track with a single click. But it stops there -- no production releases, no rollouts, no metadata management. Apps built in AI Studio still need GPC (or the Console UI) to reach production.
+
 ## Using them together
 
-A full agent-driven flow from scaffold to shipped release looks like this:
+A full agent-driven flow from scaffold to shipped release:
 
 ```bash
-# Scaffold a new project (Google's CLI)
+# Scaffold a new project (Android CLI)
 android create --template compose-tutorial --name MyApp
 
 # Install SDK components and build
-android sdk install --platform 34
-android run --device pixel-8
+android sdk install --platform 35
+android run --device pixel-9
 
 # Before uploading, run offline compliance checks (GPC)
 gpc preflight ./app/build/outputs/bundle/release/app-release.aab
@@ -56,12 +78,12 @@ gpc releases upload \
   --file ./app/build/outputs/bundle/release/app-release.aab \
   --rollout 1.0
 
-# Promote internal → production at 10% once vitals are healthy (GPC)
+# Promote internal to production at 10% once vitals are healthy (GPC)
 gpc vitals crashes --package com.example.app --days 7 --json
 gpc releases promote --from internal --to production --rollout 0.1
 ```
 
-The handoff point is deterministic: once you have an AAB on disk, you're in Play Store territory.
+The handoff point is deterministic: once you have an AAB on disk, you're in Play Store territory. Whether it was built by Android CLI, Android Studio, Gradle, or generated by AI Studio, GPC takes it from there.
 
 ## Shared skills format
 

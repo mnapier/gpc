@@ -60,6 +60,7 @@ The remaining items before the stable `1.0.0` release:
 - [x] **v0.9.73 — Skills check, Android CLI detection, upload --changelog-ai** (shipped 2026-05-11). `gpc skills check` scans installed agent skills and checks for updates. `gpc doctor` detects Google's Android CLI (check #24). `--changelog-ai --locales <csv|auto>` on `gpc releases upload` generates AI-translated release notes inline during upload. Docs: sidebar restructured (Guide 4 groups, Commands System 3 subgroups), 3 new pages (recipes, staged rollout strategy, rate limits reference), FAQPage schema on troubleshooting, clickable coverage grid, glossary cross-links. SEO: all 7 package.json files with homepage + keywords, WebSite JSON-LD, og/twitter meta. 2,281 tests.
 - [x] **v0.9.74 — Security Hardening** (shipped 2026-05-15). Full deepsec (Vercel Labs AI security scanner) audit of 74 files. 54 findings triaged: 16 real issues fixed, remainder false positives or by-design behaviors. Fixes: plugin RCE (approve before import), resumable upload SSRF, symlink traversal via --notes-dir, config set secret echo, proxy credential leakage in doctor output, skills installer env scrubbing, vitals gate ordering (check before rollout increase), image upload/delete dry-run bypass, central API path encoding (encodeURIComponent on all path params), RTDN purchase token redaction, HTTP error path sanitization, webhook argv filtering, CSV formula injection in review export, AI changelog prompt injection hardening, rate limiter per-bucket mutex. CI: deepsec scanning added to ci.yml (PR-only), `pnpm.onlyBuiltDependencies: []` supply chain lockdown, `ignore-scripts=true` in .npmrc and all 6 CI workflows, Socket CLI pinned (was @latest), lockfile integrity hash in CI, provenance verification post-publish. CVEs patched: protobufjs HIGH (code injection), vite HIGH x2 (server.fs.deny bypass, WebSocket arbitrary file read). 2,309 tests. Audit document: `.dev/engineering/SECURITY_AUDIT_2026-05-15.md`.
 - [x] **v0.9.75 — Data safety CSV fix + input validation + docs rewrite** (shipped 2026-05-19). fix(api): data safety update sends correct CSV format (was broken JSON), input validation (empty/oversized file guards), docs rewrite. 2,310 tests.
+- [ ] **v0.9.76 — Google I/O 2026 response** (planned 2026-05-20). Play Developer API parity (new SubscriptionPurchaseV2 fields, May 2026 deprecation warnings), Android CLI interop docs refresh (Android CLI 1.0 stable + AI Studio internal-track publishing), monetization docs update (60-day account recovery). Full research: `.dev/engineering/GOOGLE_IO_2026.md`.
 - [ ] Wall of Apps community showcase
 - [ ] Public marketing push (Dev.to retrospective, Android Weekly)
 - [ ] Stability soak period -- no critical bugs for 2+ weeks in production usage (soak started 2026-04-22, earliest 1.0: 2026-05-06)
@@ -2358,9 +2359,99 @@ Entirely separate APIs beyond the Publisher suite:
 
 ---
 
-## Current Status (v0.9.75)
+## v0.9.76 — Google I/O 2026 Response (planned 2026-05-20)
 
-- **Version:** `v0.9.75` (latest, shipped 2026-05-19)
+**Theme:** API parity with Google I/O 2026 announcements + positioning update for Android CLI 1.0 stable and AI Studio publish-to-internal-track.
+
+**Research doc:** `.dev/engineering/GOOGLE_IO_2026.md` (full I/O impact analysis, 2026-05-20).
+
+**Why this release exists:** Google I/O 2026 (May 19-20) shipped Play Developer API changes, deprecated subscription endpoints, introduced AI Studio internal-track publishing, and stabilized Android CLI 1.0. GPC needs to stay current on API surface and reaffirm its positioning as the production publishing complement to Google's expanding dev toolchain.
+
+---
+
+### Tier A — API parity (code changes)
+
+| # | Item | Files | Complexity |
+|---|------|-------|-----------|
+| 1 | **New `SubscriptionPurchaseV2` fields** — add `onHoldStateContext` and `inGracePeriodStateContext` (both provide pending/failed order ID when subscription enters ON_HOLD or IN_GRACE_PERIOD due to declined renewal). Announced May 19, 2026. | `packages/api/src/types.ts`, tests | Small |
+| 2 | **May 2026 subscription API deprecation warnings** — review the [May 2026 deprecation list](https://developer.android.com/google/play/billing/play-developer-apis-deprecations#may19-2026-api-deprecation) and add deprecation notices to affected methods in the API client. Follow the same pattern as existing v1 subscription deprecation warnings (stderr warning on use, suggestion to migrate). | `packages/api/src/client.ts`, `packages/core/src/commands/purchases.ts`, tests | Medium |
+| 3 | **Verify Jan 2026 API coverage** — confirm GPC already handles: (a) `purchases.subscriptionsv2.defer` with add-ons (defers all items), (b) `OfferPhase` field on `SubscriptionPurchaseLineItem` (already patched in v0.9.55 as object shape). If gaps exist, patch. | `packages/api/src/types.ts`, `packages/api/src/client.ts` | Small |
+
+### Tier B — Docs and positioning
+
+| # | Item | Files | Complexity |
+|---|------|-------|-----------|
+| 4 | **Update `android-cli-interop.md`** — Android CLI 1.0 is now stable (was preview). Capabilities: semantic analysis, Compose preview, Journeys UI testing, SDK management. Supports Claude Code, Codex, Antigravity. Still NO publishing. Add AI Studio context: single-click publish to Internal Testing Track (not production). GPC owns production lifecycle. | `apps/docs/guide/android-cli-interop.md` | Medium |
+| 5 | **Monetization docs update** — account recovery extended from 30 to 60 days (reduces involuntary churn up to 18%). Delayed charging optimization (low-risk failed payments get access while retry happens). Document in relevant monetization/subscription guide pages. | `apps/docs/commands/purchases.md` or `apps/docs/guide/` | Small |
+| 6 | **Android 17 (API 37) preflight awareness** — add a note to preflight docs that Android 17 stable ships June 2026 with mandatory large-screen resizability (ignores manifest orientation/resize on >600dp). Target SDK deadline not yet announced. No scanner changes yet, but document the upcoming requirement. | `apps/docs/commands/preflight.md` | Trivial |
+
+### Tier C — Near-term watch items (NOT in v0.9.76, track for future releases)
+
+| Item | Trigger | Target |
+|------|---------|--------|
+| Agentic catalog management API endpoints | Google ships REST endpoints for bulk price changes, SKU import, metadata config | v0.9.77+ |
+| Subscription management API (plan change at cancellation) | Google ships the new API | v0.9.77+ |
+| `gpc preflight` large-screen resizability scanner | Android 17 stable + target SDK deadline announced (expect mid-2027) | v0.9.77+ |
+| Engage SDK REST API | If Google exposes Engage SDK as a server API | Post-1.0 |
+| AI Studio production publishing expansion | If AI Studio extends beyond internal test track | Competitive response |
+
+### Explicitly out of scope
+
+- Play Shorts, Ask Play, Gemini app discovery — user-facing Play Store features, no API surface for publishers
+- Play Integrity warm-up latency improvement — no API change, just performance
+- AppFunctions platform API — on-device MCP server for apps, unrelated to publishing
+- Antigravity 2.0 / Antigravity CLI — dev orchestration platform, not publishing. GPC is already naturally agent-compatible (any agent can run `gpc` commands)
+- Play Games Sidekick — gaming social features, no publisher API
+
+### Test additions (estimated)
+
+- New SubscriptionPurchaseV2 fields: ~4 tests (type correctness, JSON round-trip for both new fields)
+- Deprecation warnings: ~4 tests (verify stderr warning on deprecated method call, verify suggestion text)
+- Jan 2026 coverage verification: ~2 tests (if gaps found)
+- **Total: ~10 new tests** (2,310 -> ~2,320)
+
+### Endpoint count after v0.9.76
+
+No change expected: **217 endpoints**. The new fields are on existing `SubscriptionPurchaseV2` response types, not new endpoints. Deprecation warnings don't add endpoints.
+
+If the May 2026 deprecation list reveals new replacement endpoints, endpoint count may increase.
+
+### Release notes draft
+
+```
+## v0.9.76 — Google I/O 2026 Response
+
+### API
+- feat(api): add `onHoldStateContext` and `inGracePeriodStateContext` fields to `SubscriptionPurchaseV2` (I/O 2026, May 19)
+- feat(api): May 2026 subscription API deprecation warnings with migration suggestions
+- fix(api): verify add-on deferral and OfferPhase coverage from Jan 2026 API update
+
+### Docs
+- docs: update Android CLI interop page for 1.0 stable + AI Studio internal-track publishing
+- docs: account recovery extended to 60 days, delayed charging optimization
+- docs: Android 17 (API 37) preflight awareness note (stable June 2026)
+```
+
+### Marketing angle
+
+> *"v0.9.76 syncs GPC with everything announced at Google I/O 2026. New subscription API fields, deprecation warnings for the May 2026 wave, and updated positioning: Android CLI handles build/debug/test, AI Studio handles prototype-to-internal-track, GPC handles everything after — production releases, staged rollouts, metadata, monetization, CI/CD. The full lifecycle."*
+
+### Competitive positioning update (for X/LinkedIn if warranted)
+
+Google I/O 2026 confirmed GPC's thesis:
+
+- **Android CLI 1.0 stable:** build, debug, test. No publishing.
+- **AI Studio:** prototype to internal test track (single-click). No production. No rollouts. No metadata. No monetization.
+- **Play Console UI:** still the only Google-provided path to production.
+- **GPC:** the CLI path to production. Complements all three.
+
+One-liner: *"Google handles the build side. GPC handles the publish side. That split held at I/O 2026."*
+
+---
+
+## Current Status (v0.9.76-dev)
+
+- **Version:** `v0.9.75` (latest shipped 2026-05-19), v0.9.76 in progress
 - **Tests:** 2,310 across 7 packages + e2e
 - **Coverage:** 90%+ line coverage on all core packages
 - **API endpoints:** 217 (Publisher v3 + Reporting v1beta1 + Custom App Publishing v1)
@@ -2373,11 +2464,17 @@ Entirely separate APIs beyond the Publisher suite:
 - **Security:** deepsec audit complete (2026-05-15), 16 findings resolved, CI supply chain hardened
 - **Live test coverage:** v0.9.71 live tested on visioo + sfn-emploi (2026-04-30)
 - **Next milestone:** v1.0.0 (stability soak + marketing push)
+- **I/O 2026 research:** `.dev/engineering/GOOGLE_IO_2026.md` (2026-05-20)
 
 ### Recent release highlights
 
 | Version | Date | Headline |
 |---------|------|----------|
+| v0.9.76 | 2026-05-20 | Google I/O 2026 response: API parity, deprecation warnings, positioning update |
+| v0.9.75 | 2026-05-19 | Data safety CSV fix, input validation, docs rewrite |
+| v0.9.74 | 2026-05-15 | Security hardening: deepsec audit, 16 fixes, CI supply chain lockdown |
+| v0.9.73 | 2026-05-11 | Skills check, Android CLI detection, upload `--changelog-ai` |
+| v0.9.72 | 2026-05-08 | API compliance patch: errorReports endpoint, v1 deprecation notices |
 | v0.9.71 | 2026-04-30 | Smarter Doctor: quota proximity check, plugin health check |
 | v0.9.70 | 2026-04-29 | `--in-app-update-priority`, `--retain-version-codes`, `default.txt` changelog fallback, promote field preservation, vitals freshness fix, Node.js 22 CI |
 | v0.9.69 | 2026-04-27 | SHA-256 image sync for `gpc metadata push`; `gpc bundles list/find/wait`; `changesNotSentForReview` auto-rescue on commit failures |

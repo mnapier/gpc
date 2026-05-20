@@ -49,7 +49,7 @@ GPC checks for updates automatically (once per 24 hours) and shows a notificatio
 
 ### How is GPC different from Fastlane supply?
 
-GPC covers 217 API endpoints — Fastlane supply covers about 20. GPC gives you reviews, vitals, subscriptions, purchases, reports, user management, **Managed Google Play private app publishing** (v0.9.56, first Android CLI to support it), and more. It has no Ruby dependency, supports structured JSON output for CI/CD, and starts in under 500ms (vs 2-3 seconds for Fastlane).
+GPC covers 217 API endpoints -- Fastlane supply covers about 20. GPC gives you reviews, vitals, subscriptions, purchases, reports, user management, **Managed Google Play private app publishing** (v0.9.56, first Android publishing CLI to support it), and more. It has no Ruby dependency, supports structured JSON output for CI/CD, and starts in under 500ms (vs 2-3 seconds for Fastlane).
 
 GPC reads Fastlane's `metadata/` directory format natively, so migration starts with zero file changes. See [Migrating from Fastlane](../migration/from-fastlane) for a step-by-step guide.
 

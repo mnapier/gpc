@@ -1,5 +1,7 @@
 import { defineConfig, type PageData } from "vitepress";
 
+const safeJsonLd = (v: unknown): string => JSON.stringify(v).replace(/</g, "\\u003c");
+
 // ── Sidebar icon helpers ─────────────────────────────────────────
 const svg = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
@@ -786,7 +788,7 @@ export default defineConfig({
         ...(fm.tags ? { keywords: (fm.tags as string[]).join(", ") } : {}),
       };
       pageData.frontmatter.head.push(
-        ["script", { type: "application/ld+json" }, JSON.stringify(blogSchema)],
+        ["script", { type: "application/ld+json" }, safeJsonLd(blogSchema)],
         ["meta", { property: "og:type", content: "article" }],
         ["meta", { property: "article:published_time", content: dateStr }],
         [

@@ -16,7 +16,7 @@ export default createContentLoader("blog/*.md", {
       .filter((page) => page.url !== "/blog/")
       .map((page) => ({
         title: page.frontmatter.title ?? "Untitled",
-        url: page.url,
+        url: page.url.startsWith("/") ? page.url : "/",
         date: page.frontmatter.date
           ? new Date(page.frontmatter.date).toISOString().slice(0, 10)
           : "",
