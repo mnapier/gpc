@@ -450,11 +450,10 @@ export interface PlayApiClient {
     ): Promise<void>;
     // refundSubscriptionV2 removed: endpoint does not exist in official API.
     // Use orders.refund or revokeSubscriptionV2 with revocationContext instead.
-    /** V2 cancel with cancellationType support. (Sep 2025) */
     cancelSubscriptionV2(
       packageName: string,
       token: string,
-      body?: SubscriptionsV2CancelRequest,
+      body: SubscriptionsV2CancelRequest,
     ): Promise<void>;
     /** V2 defer for subscriptions with add-ons. (Jan 2026) */
     deferSubscriptionV2(
@@ -1490,7 +1489,7 @@ export function createApiClient(options: ApiClientOptions): PlayApiClient {
         );
       },
 
-      async cancelSubscriptionV2(packageName, token, body?) {
+      async cancelSubscriptionV2(packageName, token, body) {
         await http.post(
           `/${p(packageName)}/purchases/subscriptionsv2/tokens/${p(token)}:cancel`,
           body,

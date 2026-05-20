@@ -447,10 +447,10 @@ export function registerPurchasesCommands(program: Command): void {
 
   sub
     .command("cancel-v2 <token>")
-    .description("Cancel a subscription (v2 — supports cancellation types)")
+    .description("Cancel a subscription (v2 -- supports cancellation types)")
     .option(
       "--type <cancellationType>",
-      "Cancellation type (e.g., USER_CANCELED, SYSTEM_CANCELED, DEVELOPER_CANCELED, REPLACED)",
+      "USER_REQUESTED_STOP_RENEWALS (default) or DEVELOPER_REQUESTED_STOP_PAYMENTS",
     )
     .action(async (token: string, options: { type?: string }) => {
       const config = await loadConfig();

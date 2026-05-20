@@ -1241,20 +1241,14 @@ describe("monetization API endpoints", () => {
       mockFetch.mockResolvedValueOnce(mockResponse({}));
       const client = makeClient();
       await client.purchases.cancelSubscriptionV2(PKG, "tok123", {
-        cancellationType: "DEVELOPER_CANCELED",
+        cancellationContext: { cancellationType: "DEVELOPER_REQUESTED_STOP_PAYMENTS" },
       });
       const [url, init] = mockFetch.mock.calls[0];
       expect(url).toBe(`${BASE_URL}/${PKG}/purchases/subscriptionsv2/tokens/tok123:cancel`);
       expect(init.method).toBe("POST");
-      expect(JSON.parse(init.body)).toEqual({ cancellationType: "DEVELOPER_CANCELED" });
-    });
-
-    it("cancelSubscriptionV2 works without body", async () => {
-      mockFetch.mockResolvedValueOnce(mockResponse({}));
-      const client = makeClient();
-      await client.purchases.cancelSubscriptionV2(PKG, "tok123");
-      const [url] = mockFetch.mock.calls[0];
-      expect(url).toContain("subscriptionsv2/tokens/tok123:cancel");
+      expect(JSON.parse(init.body)).toEqual({
+        cancellationContext: { cancellationType: "DEVELOPER_REQUESTED_STOP_PAYMENTS" },
+      });
     });
 
     it("deferSubscriptionV2 calls POST /{pkg}/purchases/subscriptionsv2/tokens/{token}:defer", async () => {

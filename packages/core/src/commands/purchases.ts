@@ -5,6 +5,7 @@ import type {
   SubscriptionPurchaseV2,
   SubscriptionDeferResponse,
   SubscriptionsV2DeferResponse,
+  CancellationType,
   Order,
 } from "@gpc-cli/api";
 import { validatePackageName } from "../utils/validation.js";
@@ -195,11 +196,12 @@ export async function cancelSubscriptionV2(
   client: PlayApiClient,
   packageName: string,
   token: string,
-  cancellationType?: string,
+  cancellationType: string = "USER_REQUESTED_STOP_RENEWALS",
 ): Promise<void> {
   validatePackageName(packageName);
-  const body = cancellationType ? { cancellationType } : undefined;
-  return client.purchases.cancelSubscriptionV2(packageName, token, body);
+  return client.purchases.cancelSubscriptionV2(packageName, token, {
+    cancellationContext: { cancellationType: cancellationType as CancellationType },
+  });
 }
 
 export async function deferSubscriptionV2(

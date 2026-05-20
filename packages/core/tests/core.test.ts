@@ -2883,20 +2883,18 @@ describe("purchases commands", () => {
 
   it("cancelSubscriptionV2 calls client.purchases.cancelSubscriptionV2", async () => {
     const client = mockClient();
-    await cancelSubscriptionV2(client, "com.example", "tok123", "DEVELOPER_CANCELED");
+    await cancelSubscriptionV2(client, "com.example", "tok123", "DEVELOPER_REQUESTED_STOP_PAYMENTS");
     expect(client.purchases.cancelSubscriptionV2).toHaveBeenCalledWith("com.example", "tok123", {
-      cancellationType: "DEVELOPER_CANCELED",
+      cancellationContext: { cancellationType: "DEVELOPER_REQUESTED_STOP_PAYMENTS" },
     });
   });
 
-  it("cancelSubscriptionV2 works without cancellationType", async () => {
+  it("cancelSubscriptionV2 defaults to USER_REQUESTED_STOP_RENEWALS", async () => {
     const client = mockClient();
     await cancelSubscriptionV2(client, "com.example", "tok123");
-    expect(client.purchases.cancelSubscriptionV2).toHaveBeenCalledWith(
-      "com.example",
-      "tok123",
-      undefined,
-    );
+    expect(client.purchases.cancelSubscriptionV2).toHaveBeenCalledWith("com.example", "tok123", {
+      cancellationContext: { cancellationType: "USER_REQUESTED_STOP_RENEWALS" },
+    });
   });
 
   it("deferSubscriptionV2 calls client.purchases.deferSubscriptionV2", async () => {

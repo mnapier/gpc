@@ -712,8 +712,15 @@ export interface AcknowledgeSubscriptionRequest {
   externalAccountId?: string;
 }
 
+export type CancellationType =
+  | "CANCELLATION_TYPE_UNSPECIFIED"
+  | "USER_REQUESTED_STOP_RENEWALS"
+  | "DEVELOPER_REQUESTED_STOP_PAYMENTS";
+
 export interface SubscriptionsV2CancelRequest {
-  cancellationType?: string;
+  cancellationContext: {
+    cancellationType: CancellationType;
+  };
 }
 
 /**
