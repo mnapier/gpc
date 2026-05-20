@@ -2774,7 +2774,7 @@ describe("purchases commands", () => {
         }),
         getProductV2: vi
           .fn()
-          .mockResolvedValue({ orderId: "o2", purchaseStateContext: { state: "PURCHASED" } }),
+          .mockResolvedValue({ orderId: "o2", purchaseStateContext: { purchaseState: "PURCHASED" } }),
         listVoided: vi.fn().mockResolvedValue({ voidedPurchases: [] }),
       },
       orders: {

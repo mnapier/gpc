@@ -1230,7 +1230,22 @@ describe("monetization API endpoints", () => {
   describe("purchases v2 endpoints", () => {
     it("getProductV2 calls GET /{pkg}/purchases/productsv2/tokens/{token}", async () => {
       mockFetch.mockResolvedValueOnce(
-        mockResponse({ orderId: "O1", purchaseStateContext: { state: "PURCHASED" } }),
+        mockResponse({
+          orderId: "O1",
+          purchaseStateContext: { purchaseState: "PURCHASED" },
+          acknowledgementState: "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED",
+          productLineItem: [
+            {
+              productId: "premium_upgrade",
+              productOfferDetails: {
+                offerId: "offer1",
+                offerTags: ["promo"],
+                quantity: 1,
+                consumptionState: "CONSUMPTION_STATE_YET_TO_BE_CONSUMED",
+              },
+            },
+          ],
+        }),
       );
       const client = makeClient();
       const result = await client.purchases.getProductV2(PKG, "tok123");
@@ -1238,6 +1253,12 @@ describe("monetization API endpoints", () => {
       expect(url).toBe(`${BASE_URL}/${PKG}/purchases/productsv2/tokens/tok123`);
       expect(init.method).toBe("GET");
       expect(result.orderId).toBe("O1");
+      expect(result.purchaseStateContext?.purchaseState).toBe("PURCHASED");
+      expect(result.acknowledgementState).toBe("ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED");
+      expect(result.productLineItem?.[0].productOfferDetails?.offerId).toBe("offer1");
+      expect(result.productLineItem?.[0].productOfferDetails?.consumptionState).toBe(
+        "CONSUMPTION_STATE_YET_TO_BE_CONSUMED",
+      );
     });
 
     it("cancelSubscriptionV2 calls POST /{pkg}/purchases/subscriptionsv2/tokens/{token}:cancel", async () => {

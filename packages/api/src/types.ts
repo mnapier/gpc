@@ -681,23 +681,52 @@ export interface BatchGetOrdersResponse {
 
 // --- ProductPurchaseV2 (Jun 2025) ---
 
+export type ProductPurchaseState =
+  | "PURCHASE_STATE_UNSPECIFIED"
+  | "PURCHASED"
+  | "CANCELLED"
+  | "PENDING";
+
+export type ProductAcknowledgementState =
+  | "ACKNOWLEDGEMENT_STATE_UNSPECIFIED"
+  | "ACKNOWLEDGEMENT_STATE_PENDING"
+  | "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED";
+
+export type ProductConsumptionState =
+  | "CONSUMPTION_STATE_UNSPECIFIED"
+  | "CONSUMPTION_STATE_YET_TO_BE_CONSUMED"
+  | "CONSUMPTION_STATE_CONSUMED";
+
+export type ProductFopType = "FOP_TYPE_UNSPECIFIED" | "TEST";
+
 export interface ProductPurchaseV2 {
   kind?: string;
   productLineItem?: ProductPurchaseLineItem[];
-  purchaseStateContext?: { state?: string };
+  purchaseStateContext?: { purchaseState?: ProductPurchaseState };
+  testPurchaseContext?: { fopType?: ProductFopType };
   orderId?: string;
-  regionCode?: string;
-  purchaseCompletionTime?: string;
-  acknowledgementState?: string;
   obfuscatedExternalAccountId?: string;
   obfuscatedExternalProfileId?: string;
-  testPurchaseContext?: Record<string, unknown>;
+  regionCode?: string;
+  purchaseCompletionTime?: string;
+  acknowledgementState?: ProductAcknowledgementState;
 }
 
 export interface ProductPurchaseLineItem {
   productId?: string;
+  productOfferDetails?: ProductOfferDetails;
+}
+
+export interface ProductOfferDetails {
+  offerTags?: string[];
+  offerId?: string;
+  purchaseOptionId?: string;
+  rentOfferDetails?: Record<string, never>;
+  preorderOfferDetails?: { preorderReleaseTime?: string };
+  offerToken?: string;
   quantity?: number;
-  offerDetails?: { offerId?: string; offerTags?: string[] };
+  refundableQuantity?: number;
+  consumptionState?: ProductConsumptionState;
 }
 
 // --- SubscriptionsV2 cancel/defer (Sep 2025 / Jan 2026) ---
