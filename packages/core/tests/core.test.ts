@@ -26,6 +26,7 @@ import {
   uploadRelease,
   getReleasesStatus,
   promoteRelease,
+  assignRelease,
   updateRollout,
   listTracks,
   createTrack,
@@ -5372,6 +5373,149 @@ describe("updateTrackConfig", () => {
     await expect(updateTrackConfig(client, "com.example", "", {})).rejects.toThrow(
       "Track name must not be empty",
     );
+  });
+
+  it("coerces numeric versionCodes to strings", async () => {
+    const client = mockClient();
+    const config = { versionCodes: [100, 200], status: "completed" };
+    await updateTrackConfig(client, "com.example", "beta", config);
+    const release = client.tracks.update.mock.calls[0][3];
+    expect(release.versionCodes).toEqual(["100", "200"]);
+  });
+
+  it("extracts fields from nested releases[] structure", async () => {
+    const client = mockClient();
+    const config = {
+      releases: [
+        {
+          versionCodes: [42],
+          status: "inProgress",
+          userFraction: 0.1,
+          name: "v2.0",
+        },
+      ],
+    };
+    await updateTrackConfig(client, "com.example", "beta", config);
+    const release = client.tracks.update.mock.calls[0][3];
+    expect(release.versionCodes).toEqual(["42"]);
+    expect(release.status).toBe("inProgress");
+    expect(release.userFraction).toBe(0.1);
+    expect(release.name).toBe("v2.0");
+  });
+
+  it("throws TRACK_MISSING_VERSION_CODES when versionCodes is empty", async () => {
+    const client = mockClient();
+    await expect(
+      updateTrackConfig(client, "com.example", "beta", { status: "completed" }),
+    ).rejects.toThrow("versionCodes must not be empty");
+  });
+
+  it("coerces mixed numeric and string versionCodes", async () => {
+    const client = mockClient();
+    const config = { versionCodes: ["100", 200, "300"], status: "completed" };
+    await updateTrackConfig(client, "com.example", "beta", config);
+    const release = client.tracks.update.mock.calls[0][3];
+    expect(release.versionCodes).toEqual(["100", "200", "300"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// assignRelease
+// ---------------------------------------------------------------------------
+describe("assignRelease", () => {
+  function mockClient(bundleExists = true): any {
+    return {
+      edits: {
+        insert: vi.fn().mockResolvedValue({ id: "edit-1", expiryTimeSeconds: "9999" }),
+        validate: vi.fn().mockResolvedValue({ id: "edit-1" }),
+        commit: vi.fn().mockResolvedValue({ id: "edit-1" }),
+        delete: vi.fn().mockResolvedValue(undefined),
+      },
+      tracks: {
+        update: vi.fn().mockResolvedValue({
+          track: "beta",
+          releases: [{ status: "completed", versionCodes: ["42"] }],
+        }),
+      },
+      bundles: {
+        list: vi.fn().mockResolvedValue(
+          bundleExists
+            ? [{ versionCode: 42, sha1: "abc", sha256: "def" }]
+            : [],
+        ),
+      },
+    };
+  }
+
+  it("assigns versionCode to a track", async () => {
+    const client = mockClient();
+    const result = await assignRelease(client, "com.example", 42, { track: "beta" });
+    expect(result.track).toBe("beta");
+    expect(result.status).toBe("completed");
+    expect(result.versionCodes).toContain("42");
+    expect(client.tracks.update).toHaveBeenCalledWith(
+      "com.example",
+      "edit-1",
+      "beta",
+      expect.objectContaining({ versionCodes: ["42"] }),
+    );
+    expect(client.edits.validate).toHaveBeenCalled();
+    expect(client.edits.commit).toHaveBeenCalled();
+  });
+
+  it("throws BUNDLE_NOT_FOUND when versionCode does not exist", async () => {
+    const client = mockClient(false);
+    await expect(
+      assignRelease(client, "com.example", 999, { track: "beta" }),
+    ).rejects.toThrow("Version code 999 not found");
+  });
+
+  it("coerces numeric versionCode to string in the release", async () => {
+    const client = mockClient();
+    await assignRelease(client, "com.example", 42, { track: "beta" });
+    const release = client.tracks.update.mock.calls[0][3];
+    expect(release.versionCodes).toEqual(["42"]);
+  });
+
+  it("merges retainVersionCodes and deduplicates", async () => {
+    const client = mockClient();
+    await assignRelease(client, "com.example", 42, {
+      track: "beta",
+      retainVersionCodes: ["41", "42", "40"],
+    });
+    const release = client.tracks.update.mock.calls[0][3];
+    expect(release.versionCodes).toEqual(["41", "40", "42"]);
+  });
+
+  it("returns early on dry run without opening an edit", async () => {
+    const client = mockClient();
+    const result = await assignRelease(client, "com.example", 42, {
+      track: "beta",
+      dryRun: true,
+    });
+    expect(result.track).toBe("beta");
+    expect(client.edits.insert).toHaveBeenCalledTimes(1);
+    expect(client.tracks.update).not.toHaveBeenCalled();
+    expect(client.edits.validate).not.toHaveBeenCalled();
+    expect(client.edits.commit).not.toHaveBeenCalled();
+  });
+
+  it("throws RELEASE_INVALID_FRACTION for out-of-range userFraction", async () => {
+    const client = mockClient();
+    await expect(
+      assignRelease(client, "com.example", 42, { track: "beta", userFraction: 2.0 }),
+    ).rejects.toThrow("Rollout percentage must be between 0 and 1");
+  });
+
+  it("sets status to inProgress when userFraction is provided", async () => {
+    const client = mockClient();
+    const result = await assignRelease(client, "com.example", 42, {
+      track: "production",
+      userFraction: 0.1,
+    });
+    expect(result.status).toBe("inProgress");
+    const release = client.tracks.update.mock.calls[0][3];
+    expect(release.userFraction).toBe(0.1);
   });
 });
 

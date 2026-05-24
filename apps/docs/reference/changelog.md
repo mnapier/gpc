@@ -11,7 +11,21 @@ head:
 
 All notable user-facing changes to GPC are documented here. For full release details, see the [GitHub Releases](https://github.com/yasserstudio/gpc/releases) page.
 
-## v0.9.77 <Badge type="tip" text="latest" />
+## v0.9.78 <Badge type="tip" text="latest" />
+
+Track safety, review flag coverage, and a new assign command.
+
+- fix: `gpc tracks update` no longer silently wipes track contents when version codes are passed as strings or nested JSON -- versionCode coercion now handles all input shapes correctly
+- fix: `--changes-not-sent-for-review` flag now works on all 15+ commands that modify releases (previously only worked on upload)
+- feat: `gpc releases assign` assigns an already-uploaded version code to a track without re-uploading the artifact
+
+**Tests:** 2,332 (+13 net).
+
+**Endpoint count:** unchanged at 217.
+
+---
+
+## v0.9.77
 
 Fix large AAB upload timeout; supply chain hardening.
 

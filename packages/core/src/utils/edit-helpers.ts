@@ -35,8 +35,32 @@ export async function validateAndCommit(
   editId: string,
   commitOptions?: EditCommitOptions,
 ): Promise<void> {
+  let rescuedFromValidate = false;
   if (!commitOptions?.changesNotSentForReview) {
-    await client.edits.validate(packageName, editId);
+    try {
+      await client.edits.validate(packageName, editId);
+    } catch (error) {
+      if (
+        error instanceof PlayApiError &&
+        error.code === "API_CHANGES_NOT_SENT_FOR_REVIEW"
+      ) {
+        process.emitWarning(
+          "App has a rejected update — auto-setting changesNotSentForReview=true",
+          "AutoRescueWarning",
+        );
+        rescuedFromValidate = true;
+      } else {
+        throw error;
+      }
+    }
   }
-  await commitWithRescue(client, packageName, editId, commitOptions);
+
+  if (rescuedFromValidate) {
+    await client.edits.commit(packageName, editId, {
+      ...commitOptions,
+      changesNotSentForReview: true,
+    });
+  } else {
+    await commitWithRescue(client, packageName, editId, commitOptions);
+  }
 }

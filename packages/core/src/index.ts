@@ -18,6 +18,7 @@ export {
   retryOnUploadNotComplete,
   getReleasesStatus,
   promoteRelease,
+  assignRelease,
   updateRollout,
   listTracks,
   createTrack,

@@ -7,6 +7,16 @@ Versioning: `0.9.x` pre-release series → `1.0.0` public launch.
 
 ---
 
+## v0.9.78
+
+Track safety, review flag coverage, and a new assign command.
+
+- fix: `gpc tracks update` no longer silently wipes track contents when version codes are passed as strings or nested JSON -- versionCode coercion now handles all input shapes correctly
+- fix: `--changes-not-sent-for-review` flag now works on all 15+ commands that modify releases (previously only worked on upload)
+- feat: `gpc releases assign` assigns an already-uploaded version code to a track without re-uploading the artifact
+
+---
+
 ## v0.9.77
 
 Fix large AAB upload timeout; supply chain hardening.

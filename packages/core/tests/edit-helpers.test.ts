@@ -153,4 +153,34 @@ describe("validateAndCommit", () => {
     expect(client.edits.commit).toHaveBeenCalledTimes(2);
     warnSpy.mockRestore();
   });
+
+  it("auto-rescues when validate throws API_CHANGES_NOT_SENT_FOR_REVIEW", async () => {
+    const rescueError = new PlayApiError(
+      "changes not sent for review",
+      "API_CHANGES_NOT_SENT_FOR_REVIEW",
+      403,
+    );
+    vi.mocked(client.edits.validate).mockRejectedValueOnce(rescueError);
+
+    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
+    await validateAndCommit(client, "com.example", "edit1");
+
+    expect(client.edits.validate).toHaveBeenCalled();
+    expect(client.edits.commit).toHaveBeenCalledWith("com.example", "edit1", {
+      changesNotSentForReview: true,
+    });
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("auto-setting"),
+      "AutoRescueWarning",
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("rethrows non-rescue errors from validate", async () => {
+    const otherError = new PlayApiError("bad request", "API_BAD_REQUEST", 400);
+    vi.mocked(client.edits.validate).mockRejectedValueOnce(otherError);
+
+    await expect(validateAndCommit(client, "com.example", "edit1")).rejects.toThrow(otherError);
+    expect(client.edits.commit).not.toHaveBeenCalled();
+  });
 });

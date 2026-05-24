@@ -10,6 +10,7 @@ import {
   uploadRelease,
   getReleasesStatus,
   promoteRelease,
+  assignRelease,
   updateRollout,
   readReleaseNotesFromDir,
   isVersionedNotesDir,
@@ -565,6 +566,108 @@ export function registerReleasesCommands(program: Command): void {
         status: options.status,
         userFraction: options.rollout ? Number(options.rollout) / 100 : undefined,
         releaseNotes,
+        commitOptions: buildCommitOptions(options),
+      });
+      console.log(formatOutput(result, format));
+    });
+
+  // Assign
+  releases
+    .command("assign <versionCode>")
+    .description("Assign an already-uploaded version code to a track without re-uploading")
+    .option("--track <track>", "Target track", "internal")
+    .option("--status <status>", "Release status: completed, inProgress, draft, halted")
+    .option("--rollout <percent>", "Staged rollout percentage (sets status to inProgress)")
+    .option("--notes <text>", "Release notes (en-US)")
+    .option("--name <name>", "Release name")
+    .option(
+      "--in-app-update-priority <priority>",
+      "In-app update priority (0-5, where 5 is highest)",
+      (v: string) => {
+        const n = parseInt(v, 10);
+        if (isNaN(n) || n < 0 || n > 5) {
+          throw new GpcError(
+            `Invalid in-app update priority: ${v}`,
+            "RELEASES_USAGE_ERROR",
+            2,
+            "Use a value from 0 (default, no priority) to 5 (highest priority).",
+          );
+        }
+        return n;
+      },
+    )
+    .option(
+      "--retain-version-codes <codes>",
+      "Retain previous version codes alongside the new one (comma-separated)",
+      (v: string) =>
+        v
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+    )
+    .option(
+      "--changes-not-sent-for-review",
+      "Commit changes without sending for review (required for rejected apps)",
+    )
+    .option(
+      "--error-if-in-review",
+      "Fail if changes are already in review instead of cancelling them",
+    )
+    .action(async (versionCodeArg: string, options) => {
+      const versionCode = Number(versionCodeArg);
+      if (!Number.isFinite(versionCode) || versionCode <= 0) {
+        throw new GpcError(
+          `Invalid version code: ${versionCodeArg}`,
+          "RELEASES_USAGE_ERROR",
+          2,
+          "Provide a positive integer version code (e.g., gpc releases assign 42 --track beta).",
+        );
+      }
+
+      if (options.rollout !== undefined) {
+        const rolloutVal = Number(options.rollout);
+        if (!Number.isFinite(rolloutVal) || rolloutVal < 1 || rolloutVal > 100) {
+          throw new GpcError(
+            `--rollout must be a number between 1 and 100 (got: ${options.rollout})`,
+            "RELEASES_USAGE_ERROR",
+            2,
+            "Use a percentage between 1 and 100.",
+          );
+        }
+      }
+
+      const config = await loadConfig();
+      const packageName = resolvePackageName(program.opts()["app"], config);
+      const format = getOutputFormat(program, config);
+
+      if (isDryRun(program)) {
+        printDryRun(
+          {
+            command: "releases assign",
+            action: "assign",
+            target: `versionCode ${versionCode} → ${options.track}`,
+            details: {
+              ...(options.rollout && { rollout: options.rollout }),
+              ...(options.status && { status: options.status }),
+            },
+          },
+          format,
+          formatOutput,
+        );
+        return;
+      }
+
+      const client = await getClient(config);
+      const result = await assignRelease(client, packageName, versionCode, {
+        track: options.track,
+        status: options.status,
+        userFraction: options.rollout ? Number(options.rollout) / 100 : undefined,
+        releaseNotes: options.notes
+          ? [{ language: "en-US", text: options.notes }]
+          : undefined,
+        releaseName: options.name,
+        inAppUpdatePriority: options.inAppUpdatePriority,
+        retainVersionCodes: options.retainVersionCodes,
         commitOptions: buildCommitOptions(options),
       });
       console.log(formatOutput(result, format));

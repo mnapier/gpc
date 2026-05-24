@@ -17,6 +17,7 @@ import { PlayApiError } from "@gpc-cli/api";
 import { GpcError } from "../errors.js";
 import { validateUploadFile } from "../utils/file-validation.js";
 import { validateAndCommit, commitWithRescue } from "../utils/edit-helpers.js";
+import { findBundle } from "./bundles.js";
 
 const BUNDLE_POLL_BACKOFF = [2_000, 3_000, 5_000, 8_000, 13_000, 21_000, 34_000];
 
@@ -445,6 +446,83 @@ export async function promoteRelease(
   });
 }
 
+export async function assignRelease(
+  client: PlayApiClient,
+  packageName: string,
+  versionCode: number,
+  options: {
+    track: string;
+    status?: string;
+    userFraction?: number;
+    releaseNotes?: { language: string; text: string }[];
+    releaseName?: string;
+    inAppUpdatePriority?: number;
+    retainVersionCodes?: string[];
+    dryRun?: boolean;
+    commitOptions?: EditCommitOptions;
+  },
+): Promise<ReleaseStatusResult> {
+  if (options.userFraction && (options.userFraction <= 0 || options.userFraction > 1)) {
+    throw new GpcError(
+      "Rollout percentage must be between 0 and 1 (e.g., 0.1 for 10%)",
+      "RELEASE_INVALID_FRACTION",
+      2,
+      "Use a decimal value like 0.1 for 10%, 0.5 for 50%, or 1.0 for 100%.",
+    );
+  }
+
+  const bundle = await findBundle(client, packageName, versionCode);
+  if (!bundle) {
+    throw new GpcError(
+      `Version code ${versionCode} not found — the bundle must be uploaded before it can be assigned`,
+      "BUNDLE_NOT_FOUND",
+      4,
+      "Upload the bundle first with 'gpc releases upload', or check the version code with 'gpc bundles list'.",
+    );
+  }
+
+  const code = String(versionCode);
+  const release: Release = {
+    versionCodes: [
+      ...(options.retainVersionCodes || []).filter((vc) => vc !== code),
+      code,
+    ],
+    status: (options.status ||
+      (options.userFraction ? "inProgress" : "completed")) as Release["status"],
+    ...(options.userFraction && { userFraction: options.userFraction }),
+    ...(options.releaseNotes && { releaseNotes: options.releaseNotes }),
+    ...(options.releaseName && { name: options.releaseName }),
+    ...(options.inAppUpdatePriority !== undefined && {
+      inAppUpdatePriority: options.inAppUpdatePriority,
+    }),
+  };
+
+  if (options.dryRun) {
+    return {
+      track: options.track,
+      status: release.status,
+      versionCodes: release.versionCodes,
+      userFraction: release.userFraction,
+    };
+  }
+
+  const edit = await client.edits.insert(packageName);
+  try {
+    await client.tracks.update(packageName, edit.id, options.track, release);
+    await validateAndCommit(client, packageName, edit.id, options.commitOptions);
+
+    return {
+      track: options.track,
+      status: release.status,
+      versionCodes: release.versionCodes,
+      userFraction: release.userFraction,
+    };
+  } catch (error) {
+    await client.edits.delete(packageName, edit.id).catch(() => {});
+    throw error;
+  }
+}
+
 export async function updateRollout(
   client: PlayApiClient,
   packageName: string,
@@ -584,18 +662,39 @@ export async function updateTrackConfig(
 
   const edit = await client.edits.insert(packageName);
   try {
+    // Support both flat config and nested track-shaped JSON (releases[0].*)
+    const nested =
+      Array.isArray(config["releases"]) && config["releases"].length > 0
+        ? (config["releases"] as Record<string, unknown>[])[0]
+        : undefined;
+    const pick = (key: string) => nested?.[key] ?? config[key];
+
+    const rawCodes = pick("versionCodes") as (string | number)[] | undefined;
+    if (!rawCodes || rawCodes.length === 0) {
+      throw new GpcError(
+        "versionCodes must not be empty — refusing to update track with no versions",
+        "TRACK_MISSING_VERSION_CODES",
+        2,
+        "Provide at least one versionCode in the config file.",
+      );
+    }
+    const versionCodes = rawCodes.map(String);
+
     const release: Release = {
-      versionCodes: (config["versionCodes"] as string[]) || [],
-      status: ((config["status"] as string) || "completed") as Release["status"],
+      versionCodes,
+      status: (((pick("status") as string) || "completed") as Release["status"]),
     };
-    if (config["userFraction"] !== undefined) {
-      release.userFraction = config["userFraction"] as number;
+    if (pick("userFraction") !== undefined) {
+      release.userFraction = pick("userFraction") as number;
     }
-    if (config["releaseNotes"]) {
-      release.releaseNotes = config["releaseNotes"] as { language: string; text: string }[];
+    if (pick("releaseNotes")) {
+      release.releaseNotes = pick("releaseNotes") as { language: string; text: string }[];
     }
-    if (config["name"]) {
-      release.name = config["name"] as string;
+    if (pick("name")) {
+      release.name = pick("name") as string;
+    }
+    if (pick("inAppUpdatePriority") !== undefined) {
+      release.inAppUpdatePriority = pick("inAppUpdatePriority") as number;
     }
 
     const track = await client.tracks.update(packageName, edit.id, trackName, release);
