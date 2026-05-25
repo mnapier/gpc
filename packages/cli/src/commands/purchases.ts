@@ -126,13 +126,23 @@ export function registerPurchasesCommands(program: Command): void {
       if (format !== "json") {
         const r = result as unknown as Record<string, unknown>;
         const lineItems = r["lineItems"] as Record<string, unknown>[] | undefined;
-        const row = {
+        const onHold = r["onHoldStateContext"] as Record<string, unknown> | undefined;
+        const inGrace = r["inGracePeriodStateContext"] as Record<string, unknown> | undefined;
+        const onHoldPending = (
+          onHold?.["renewalDeclined"] as Record<string, unknown> | undefined
+        )?.["pendingOrderId"];
+        const inGracePending = (
+          inGrace?.["renewalDeclined"] as Record<string, unknown> | undefined
+        )?.["pendingOrderId"];
+        const row: Record<string, unknown> = {
           subscriptionState: r["subscriptionState"] || "-",
           startTime: r["startTime"] || "-",
           expiryTime: r["expiryTime"] || "-",
           linkedPurchaseToken: r["linkedPurchaseToken"] ? "yes" : "no",
           lineItems: lineItems?.length || 0,
           acknowledgement: r["acknowledgementState"] || "-",
+          ...(onHoldPending && { onHoldPendingOrderId: onHoldPending }),
+          ...(inGracePending && { gracePeriodPendingOrderId: inGracePending }),
         };
         console.log(formatOutput(row, format));
       } else {

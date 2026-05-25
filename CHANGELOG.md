@@ -7,6 +7,23 @@ Versioning: `0.9.x` pre-release series → `1.0.0` public launch.
 
 ---
 
+## v0.9.79
+
+Developer clarity, API contract refresh, Android 16 preflight.
+
+- feat: upload, promote, assign, and rollout commands now surface a structured `reviewPending: true` result and a `nextStep` hint when Google rejects the commit due to a pending review -- previously this was a silent internal warning
+- feat: bundle processing poll now logs elapsed time and attempt count to stderr (e.g. "Waiting for Google to finish processing bundle... (15s, attempt 3/7)")
+- fix: `API_EDIT_EXPIRED` error message now reads "Your edit session expired (they last ~1 hour). No data was lost. Retrying is safe." instead of a generic failure
+- feat: upload and assign to the internal track now returns `reviewSkipped: true` and prints "Internal track: no Google review required. Testers will see this build immediately."
+- feat: new `API_ROLLOUT_DECREASE_FORBIDDEN` error with actionable suggestion to halt the rollout first, then start a new rollout at the lower fraction
+- feat: `--dry-run` on upload now returns `executed` and `skipped` arrays showing exactly which API calls would and would not happen
+- feat(api): add `OfferPhaseDetails` interface and `offerPhaseDetails` field on `OrderLineItem.subscriptionDetails` (replaces deprecated `OfferPhase`, sunset Aug 31, 2028)
+- feat: `gpc purchases subscription get` now shows `onHoldPendingOrderId` and `gracePeriodPendingOrderId` in table output
+- fix(preflight): bump default `targetSdkMinimum` from 35 to 36 (Android 16 requirement, Google enforcement Aug 31, 2026)
+- ci: add Node.js 24 to CI test matrix alongside Node 22 (Node 24 becomes `setup-node` default June 16, 2026)
+
+---
+
 ## v0.9.78
 
 Track safety, review flag coverage, and a new assign command.

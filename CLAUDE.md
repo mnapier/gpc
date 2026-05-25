@@ -44,7 +44,8 @@ e2e/               → End-to-end tests
 - Phase 9 ✓ — Security audit, interactive mode, VitePress docs, standalone binary, Homebrew tap, npm publish, README/CHANGELOG
 - Phase 10 ✓ — `gpc preflight` pre-submission compliance scanner (9 scanners, offline AAB policy checks)
 - Published to npm: `npm install -g @gpc-cli/cli`
-- Current version: v0.9.78 — pre-release series (`0.9.x` → `1.0.0` public launch)
+- Current version: v0.9.79 — pre-release series (`0.9.x` → `1.0.0` public launch)
+- v0.9.79: developer clarity release -- structured reviewPending result + nextStep hint on commit rejection, bundle processing progress logs, improved API_EDIT_EXPIRED message, reviewSkipped on internal track, API_ROLLOUT_DECREASE_FORBIDDEN error, dry-run executed/skipped arrays, OfferPhaseDetails type, preflight targetSdkMinimum bumped to 36, Node 24 in CI matrix.
 - v0.9.78: fix `tracks update` versionCode coercion + nested JSON support, fix `validateAndCommit` auto-rescue for changesNotSentForReview on validate (15+ commands), new `gpc releases assign` command.
 - v0.9.77: fix large AAB upload timeout -- extended bundle processing poll from ~31s to ~86s (Fibonacci backoff), multi-retry guard on validate/commit (15s, 30s, 45s). Supply chain hardening -- Trusted Publisher (OIDC, no long-lived NPM_TOKEN), staged publishing (human 2FA approval before packages go live).
 - v0.9.76: Google I/O 2026 response -- full API contract audit (50+ fixes against official reference docs), SubscriptionPurchaseV2 new fields, blog launch, docs alignment.

@@ -9,7 +9,7 @@ function makeManifest(overrides: Partial<ParsedManifest> = {}): ParsedManifest {
     versionCode: 42,
     versionName: "1.0.0",
     minSdk: 24,
-    targetSdk: 35,
+    targetSdk: 36,
     debuggable: false,
     testOnly: false,
     usesCleartextTraffic: false,
@@ -49,7 +49,7 @@ describe("manifestScanner", () => {
   });
 
   it("passes when targetSdk equals minimum", async () => {
-    const findings = await manifestScanner.scan(makeCtx(makeManifest({ targetSdk: 35 })));
+    const findings = await manifestScanner.scan(makeCtx(makeManifest({ targetSdk: 36 })));
     expect(findings.find((f) => f.ruleId === "targetSdk-below-minimum")).toBeUndefined();
   });
 
@@ -103,7 +103,7 @@ describe("manifestScanner", () => {
     const findings = await manifestScanner.scan(
       makeCtx(
         makeManifest({
-          targetSdk: 35,
+          targetSdk: 36,
           activities: [
             { name: ".MainActivity", exported: undefined, hasIntentFilter: true },
             { name: ".OtherActivity", exported: true, hasIntentFilter: true },
@@ -120,7 +120,7 @@ describe("manifestScanner", () => {
     const findings = await manifestScanner.scan(
       makeCtx(
         makeManifest({
-          targetSdk: 35,
+          targetSdk: 36,
           activities: [{ name: ".InternalActivity", exported: undefined, hasIntentFilter: false }],
         }),
       ),
@@ -132,7 +132,7 @@ describe("manifestScanner", () => {
     const findings = await manifestScanner.scan(
       makeCtx(
         makeManifest({
-          targetSdk: 35,
+          targetSdk: 36,
           permissions: ["android.permission.FOREGROUND_SERVICE"],
           services: [
             { name: ".MyService", hasIntentFilter: false, foregroundServiceType: undefined },
@@ -149,7 +149,7 @@ describe("manifestScanner", () => {
     const findings = await manifestScanner.scan(
       makeCtx(
         makeManifest({
-          targetSdk: 35,
+          targetSdk: 36,
           permissions: ["android.permission.FOREGROUND_SERVICE"],
           services: [
             { name: ".MyService", hasIntentFilter: false, foregroundServiceType: "location" },

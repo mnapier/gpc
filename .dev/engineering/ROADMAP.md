@@ -62,10 +62,11 @@ The remaining items before the stable `1.0.0` release:
 - [x] **v0.9.75 — Data safety CSV fix + input validation + docs rewrite** (shipped 2026-05-19). fix(api): data safety update sends correct CSV format (was broken JSON), input validation (empty/oversized file guards), docs rewrite. 2,310 tests.
 - [x] **v0.9.76 — Google I/O 2026 response** (shipped 2026-05-20). Play Developer API parity (new SubscriptionPurchaseV2 fields, May 2026 deprecation warnings), Android CLI interop docs refresh (Android CLI 1.0 stable + AI Studio internal-track publishing), monetization docs update (60-day account recovery), full API contract audit (50+ fixes). 2,313 tests. Release: https://github.com/yasserstudio/gpc/releases/tag/v0.9.76
 - [x] **v0.9.77 — Fix large AAB upload timeout, supply chain hardening** (shipped 2026-05-22). Fibonacci backoff polling (~86s), multi-retry guard on validate/commit. Trusted Publisher (OIDC), Staged Publishing (2FA gate), NPM_TOKEN deleted. 2,319 tests. Release: https://github.com/yasserstudio/gpc/releases/tag/v0.9.77
-- [x] **v0.9.78 — Track management, edit commit, and version assignment fixes** (shipped 2026-05-24). fix: `tracks update` versionCode coercion + nested JSON support. fix: `validateAndCommit` auto-rescue for changesNotSentForReview on validate (15+ commands). feat: `gpc releases assign <versionCode> --track <track>`. 2,332 tests. Release: https://github.com/yasserstudio/gpc/releases/tag/v0.9.78
+- [x] **v0.9.78 -- Track management, edit commit, and version assignment fixes** (shipped 2026-05-24). fix: `tracks update` versionCode coercion + nested JSON support. fix: `validateAndCommit` auto-rescue for changesNotSentForReview on validate (15+ commands). feat: `gpc releases assign <versionCode> --track <track>`. 2,332 tests. Release: https://github.com/yasserstudio/gpc/releases/tag/v0.9.78
+- [x] **v0.9.79 -- Developer clarity, API contract refresh, Android 16 preflight** (planned). Two tracks: (A) Developer/AI-agent clarity: visible auto-rescue output + JSON `reviewPending` flag after rejection commit, bundle processing progress logging, edit expiry error improvement, internal track "no review" note, staged rollout decrease actionable error, `--dry-run` boundary logging. (B) API contract: `offerPhaseDetails` on Orders (deprecates `offerPhase`), OTP purchase option offers audit (7 methods + batch), `edits.tracks.create` for custom closed testing, surface `onHoldStateContext`/`inGracePeriodStateContext` in subscription output. Plus: `target-sdk-version` preflight scanner (API 36, Aug 31 2026 deadline), Node.js 24 CI compat (June 16 default). 2,332 tests.
 - [ ] Wall of Apps community showcase
 - [ ] Public marketing push (Dev.to retrospective, Android Weekly)
-- [ ] Stability soak period -- no critical bugs for 2+ weeks in production usage (soak restarted 2026-05-24 after v0.9.78, earliest 1.0: 2026-06-07)
+- [ ] Stability soak period -- no critical bugs for 2+ weeks in production usage (soak restarts after v0.9.79, earliest 1.0: 2 weeks after v0.9.79 ships)
 - [x] GitHub Actions Node.js 22 migration (done in v0.9.70)
 - [ ] Dependency audit cleanup (see [Supply Chain Status](#supply-chain-status) below)
 
@@ -2864,13 +2865,20 @@ Audit against [Google Play Developer APIs overview](https://developer.android.co
 6. ~~Missing batch endpoints for OTP and subscriptions~~ **Done (v0.9.47)** -- 10 batch endpoints
 
 **Remaining for v1.0.0:**
+- v0.9.79: API contract refresh (offerPhaseDetails, OTP offers audit, tracks.create, target SDK 36 preflight, Node 24 CI)
 - Hall of Fame community showcase (plan: `.dev/engineering/WALL_OF_APPS_PLAN.md`)
 - Website launch: gpccli.com (plan: `.dev/engineering/WEBSITE_PLAN.md`)
 - Public marketing push (blog posts, X threads, Reddit, Android Weekly)
 - Stability soak period (2+ weeks, zero critical bugs)
-- GitHub Actions Node.js 22 migration (deadline: June 2, 2026)
 - Simple upload `?uploadType=media` spec compliance (#1)
 - Parameter sprawl cleanup on subscription/OTP update methods (technical debt)
+
+**Hard deadlines (upcoming):**
+- **June 16, 2026** -- GitHub Actions runners default to Node.js 24 (Sept 16: Node 20 removed)
+- **June 30, 2026** -- Google Play fee structure change (US/UK/EU). Docs-only.
+- **August 31, 2026** -- Target SDK level 36 (Android 16) required for all new apps/updates
+- **August 31, 2026** -- Play Billing Library v7 sunset (client-side, docs-only)
+- **September 30, 2026** -- Developer Verification enforcement (BR, ID, SG, TH first)
 
 ---
 
@@ -2951,10 +2959,10 @@ Audit against [Google Play Developer APIs overview](https://developer.android.co
 - Enterprise/OEM use case
 - 4 new endpoints
 
-**One-Time Product Offers nested CRUD**
-- Full lifecycle for OTP purchase option offers
-- list, get, create, update, delete, activate, deactivate, cancel
-- Batch operations: batchGet, batchUpdate, batchDelete, batchUpdateStates
+**One-Time Product Offers nested CRUD** (confirmed in discovery doc revision 20260520)
+- Full lifecycle for OTP purchase option offers (7 methods): activate, batchDelete, batchGet, batchUpdate, batchUpdateStates, cancel, deactivate, list
+- Parent-level batch ops: `purchaseOptions.batchDelete`, `purchaseOptions.batchUpdateStates`
+- v0.9.79 will audit current coverage and wire any missing methods
 
 **`reviews.list` sortOrder parameter**
 - Add `reviewsSortOrder` query param (newest, rating)
@@ -2989,3 +2997,21 @@ Audit against [Google Play Developer APIs overview](https://developer.android.co
 - YAML/JSON-defined multi-step release pipelines
 - Step outputs, variable interpolation, conditional logic
 - Alternative to shell scripts for complex release workflows
+
+---
+
+## Watch List (May 2026)
+
+Items announced or hinted at by Google that have no API surface yet. Monitor monthly.
+
+| Item | Source | Expected | Action when available |
+|------|--------|----------|----------------------|
+| Parallel track publishing | I/O 2026 blog | Later 2026 | Test tracks isolated from production reviews. Update release flow recommendations. |
+| Submission history API | I/O 2026 blog | Later 2026 | New endpoints for review submission records. Wire into `gpc releases` or `gpc status`. |
+| Agentic catalog management | I/O 2026 blog | TBD | Bulk price changes, SKU import. Console-first, REST endpoints may follow. |
+| In-app subscription management API | I/O 2026 / PBL 9.0 | TBD | Plan changes at cancellation with prorated refunds. Server-side REST for `gpc subscriptions`. |
+| Developer Verification API | Verification program | TBD | Registration status queries, programmatic package registration. Phase 2b of v0.9.66 work. |
+| Play Age Signals API | US state laws (Utah May 2026, Louisiana July 2026) | Beta available | Client-side API. No publishing CLI impact unless server endpoints emerge. |
+| In-App Content Search / Deep Links | Play Store AI discovery | TBD | If Google exposes deep link registration via Developer API, add to `gpc listings`. |
+
+Last reviewed: 2026-05-25.

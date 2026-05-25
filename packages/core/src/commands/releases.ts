@@ -20,6 +20,7 @@ import { validateAndCommit, commitWithRescue } from "../utils/edit-helpers.js";
 import { findBundle } from "./bundles.js";
 
 const BUNDLE_POLL_BACKOFF = [2_000, 3_000, 5_000, 8_000, 13_000, 21_000, 34_000];
+const REVIEW_PENDING_NEXT_STEP = "Send for review from Google Play Console > Publishing overview";
 
 export async function waitForBundleProcessing(
   client: PlayApiClient,
@@ -28,9 +29,14 @@ export async function waitForBundleProcessing(
   versionCode: number,
   backoff: number[] = BUNDLE_POLL_BACKOFF,
 ): Promise<void> {
+  const start = Date.now();
   for (let i = 0; i < backoff.length; i++) {
     const bundles = await client.bundles.list(packageName, editId);
     if (bundles.some((b) => b.versionCode === versionCode)) return;
+    const elapsed = Math.round((Date.now() - start) / 1000);
+    console.error(
+      `  Waiting for Google to finish processing bundle... (${elapsed}s, attempt ${i + 1}/${backoff.length})`,
+    );
     await new Promise((r) => setTimeout(r, backoff[i]));
   }
   throw new GpcError(
@@ -148,6 +154,9 @@ export interface UploadResult {
   track: string;
   status: string;
   validateOnly?: true;
+  reviewPending?: boolean;
+  reviewSkipped?: boolean;
+  nextStep?: string;
 }
 
 export interface ReleaseStatusResult {
@@ -156,6 +165,9 @@ export interface ReleaseStatusResult {
   versionCodes: string[];
   userFraction?: number;
   releaseNotes?: { language: string; text: string }[];
+  reviewPending?: boolean;
+  reviewSkipped?: boolean;
+  nextStep?: string;
 }
 
 export interface DryRunUploadResult {
@@ -164,6 +176,8 @@ export interface DryRunUploadResult {
   track: string;
   currentReleases: { versionCodes: string[]; status: string; userFraction?: number }[];
   plannedRelease: { status: string; userFraction?: number };
+  executed: string[];
+  skipped: string[];
 }
 
 export async function uploadRelease(
@@ -229,6 +243,13 @@ export async function uploadRelease(
         status: plannedStatus,
         ...(options.userFraction !== undefined && { userFraction: options.userFraction }),
       },
+      executed: [
+        "Validated file",
+        "Opened edit session (read-only)",
+        "Fetched current track state",
+        "Discarded edit",
+      ],
+      skipped: ["Upload bundle", "Assign to track", "Commit edit"],
     };
   }
 
@@ -337,14 +358,27 @@ export async function uploadRelease(
       };
     }
 
-    await retryOnUploadNotComplete(() =>
+    const commitResult = await retryOnUploadNotComplete(() =>
       commitWithRescue(client, packageName, edit.id, options.commitOptions),
     );
+
+    const isInternal = options.track === "internal";
+    if (isInternal) {
+      console.error(
+        "  Internal track: no Google review required. Testers will see this build immediately.",
+      );
+    }
 
     return {
       versionCode: bundle.versionCode,
       track: options.track,
       status: release.status,
+      ...(isInternal && { reviewSkipped: true }),
+      ...(commitResult.rescued &&
+        !isInternal && {
+          reviewPending: true,
+          nextStep: REVIEW_PENDING_NEXT_STEP,
+        }),
     };
   } catch (error) {
     await client.edits.delete(packageName, edit.id).catch(() => {});
@@ -435,13 +469,22 @@ export async function promoteRelease(
     };
 
     await client.tracks.update(packageName, edit.id, toTrack, release);
-    await validateAndCommit(client, packageName, edit.id, options?.commitOptions);
+    const commitResult = await validateAndCommit(
+      client,
+      packageName,
+      edit.id,
+      options?.commitOptions,
+    );
 
     return {
       track: toTrack,
       status: release.status,
       versionCodes: release.versionCodes,
       userFraction: release.userFraction,
+      ...(commitResult.rescued && {
+        reviewPending: true,
+        nextStep: REVIEW_PENDING_NEXT_STEP,
+      }),
     };
   });
 }
@@ -506,13 +549,22 @@ export async function assignRelease(
   const edit = await client.edits.insert(packageName);
   try {
     await client.tracks.update(packageName, edit.id, options.track, release);
-    await validateAndCommit(client, packageName, edit.id, options.commitOptions);
+    const commitResult = await validateAndCommit(
+      client,
+      packageName,
+      edit.id,
+      options.commitOptions,
+    );
 
     return {
       track: options.track,
       status: release.status,
       versionCodes: release.versionCodes,
       userFraction: release.userFraction,
+      ...(commitResult.rescued && {
+        reviewPending: true,
+        nextStep: REVIEW_PENDING_NEXT_STEP,
+      }),
     };
   } catch (error) {
     await client.edits.delete(packageName, edit.id).catch(() => {});
@@ -589,13 +641,17 @@ export async function updateRollout(
     };
 
     await client.tracks.update(packageName, edit.id, track, release);
-    await validateAndCommit(client, packageName, edit.id, commitOptions);
+    const commitResult = await validateAndCommit(client, packageName, edit.id, commitOptions);
 
     return {
       track,
       status: newStatus,
       versionCodes: release.versionCodes,
       userFraction: newFraction,
+      ...(commitResult.rescued && {
+        reviewPending: true,
+        nextStep: REVIEW_PENDING_NEXT_STEP,
+      }),
     };
   } catch (error) {
     await client.edits.delete(packageName, edit.id).catch(() => {});

@@ -138,15 +138,16 @@ GPC pattern-matches Google Play API error responses to provide specific, actiona
 
 #### Upload & Release Errors
 
-| Code                            | HTTP    | What happened                        | What to do                                                                                                   |
-| ------------------------------- | ------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `API_DUPLICATE_VERSION_CODE`    | 400/403 | Version code already uploaded        | Increment `versionCode` in build.gradle and rebuild. Check current: `gpc releases status --track production` |
-| `API_VERSION_CODE_TOO_LOW`      | 400/403 | Version code lower than current      | Google Play requires increasing version codes. Check current: `gpc releases status --track <track>`          |
-| `API_PACKAGE_NAME_MISMATCH`     | 400/403 | AAB package doesn't match target app | Verify `applicationId` in build.gradle matches the app. Check: `gpc config show`                             |
-| `API_BUNDLE_TOO_LARGE`          | 400/413 | File exceeds Google's size limit     | AAB max: 2 GB, APK max: 1 GB. Check: `gpc preflight <file>`                                                  |
-| `API_INVALID_BUNDLE`            | 400     | Corrupted or malformed AAB/APK       | Ensure properly signed. Validate: `gpc preflight <file>`. Rebuild: `./gradlew bundleRelease`                 |
-| `API_RELEASE_NOTES_TOO_LONG`    | 400     | Release notes exceed 500 chars       | Shorten per language. Preview: `gpc releases notes get --track <track>`                                      |
-| `API_ROLLOUT_ALREADY_COMPLETED` | 400     | Release already at 100% rollout      | Deploy a new version: `gpc releases upload --track <track>`                                                  |
+| Code                             | HTTP    | What happened                            | What to do                                                                                                                         |
+| -------------------------------- | ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `API_DUPLICATE_VERSION_CODE`     | 400/403 | Version code already uploaded            | Increment `versionCode` in build.gradle and rebuild. Check current: `gpc releases status --track production`                       |
+| `API_VERSION_CODE_TOO_LOW`       | 400/403 | Version code lower than current          | Google Play requires increasing version codes. Check current: `gpc releases status --track <track>`                                |
+| `API_PACKAGE_NAME_MISMATCH`      | 400/403 | AAB package doesn't match target app     | Verify `applicationId` in build.gradle matches the app. Check: `gpc config show`                                                   |
+| `API_BUNDLE_TOO_LARGE`           | 400/413 | File exceeds Google's size limit         | AAB max: 2 GB, APK max: 1 GB. Check: `gpc preflight <file>`                                                                        |
+| `API_INVALID_BUNDLE`             | 400     | Corrupted or malformed AAB/APK           | Ensure properly signed. Validate: `gpc preflight <file>`. Rebuild: `./gradlew bundleRelease`                                       |
+| `API_RELEASE_NOTES_TOO_LONG`     | 400     | Release notes exceed 500 chars           | Shorten per language. Preview: `gpc releases notes get --track <track>`                                                            |
+| `API_ROLLOUT_ALREADY_COMPLETED`  | 400     | Release already at 100% rollout          | Deploy a new version: `gpc releases upload --track <track>`                                                                        |
+| `API_ROLLOUT_DECREASE_FORBIDDEN` | 400/403 | Attempted to decrease rollout percentage | Rollout percentages cannot go down. Halt the rollout first: `gpc releases rollout halt --track <track>`, then start a new release. |
 
 #### Access & Session Errors
 
@@ -156,7 +157,7 @@ GPC pattern-matches Google Play API error responses to provide specific, actiona
 | `API_TRACK_NOT_FOUND`          | 404  | Track doesn't exist                 | Built-in: internal, alpha, beta, production. List custom: `gpc tracks list`     |
 | `API_INSUFFICIENT_PERMISSIONS` | 403  | Service account missing permissions | Grant permissions in Play Console → Users and permissions. Verify: `gpc doctor` |
 | `API_EDIT_CONFLICT`            | 409  | Another edit session open           | Wait and retry. GPC auto-retries once. Or discard stale edit in Play Console    |
-| `API_EDIT_EXPIRED`             | 400  | Edit session timed out (~1 hour)    | Retry — GPC opens a fresh edit automatically                                    |
+| `API_EDIT_EXPIRED`             | 400  | Edit session expired (~1 hour TTL)  | Safe to retry -- no data was lost. GPC opens a fresh edit automatically         |
 
 #### Review State Errors
 

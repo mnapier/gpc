@@ -11,7 +11,28 @@ head:
 
 All notable user-facing changes to GPC are documented here. For full release details, see the [GitHub Releases](https://github.com/yasserstudio/gpc/releases) page.
 
-## v0.9.78 <Badge type="tip" text="latest" />
+## v0.9.79 <Badge type="tip" text="latest" />
+
+Upload and rollout visibility, edit session clarity, and API type improvements.
+
+- feat: auto-rescue visibility -- upload, promote, assign, and rollout commands now return `reviewPending: true` and a `nextStep` hint when Google rejects the commit due to a pending rejected update; a console banner explains what happened and directs you to Play Console > Publishing overview > Send for review
+- feat: bundle processing progress -- elapsed time and attempt count are logged to stderr during the server-side bundle processing wait
+- fix: `API_EDIT_EXPIRED` error message now reads "Your edit session expired (they last ~1 hour). No data was lost. Retrying is safe."
+- feat: internal track uploads set `reviewSkipped: true` in output and log "no Google review required"
+- feat: new `API_ROLLOUT_DECREASE_FORBIDDEN` error code with "halt first" suggestion when attempting to decrease a staged rollout percentage
+- feat: dry-run upload output now includes `executed` and `skipped` arrays for clarity
+- feat(api): new `OfferPhaseDetails` type replacing deprecated `OfferPhase` (sunset Aug 31 2028)
+- feat(api): `purchases subscription get` now returns `onHoldPendingOrderId` and `gracePeriodPendingOrderId` as top-level convenience fields alongside the existing state context objects
+- fix(preflight): `targetSdkMinimum` default bumped from 35 to 36 (Android 16, required Aug 31 2026)
+- ci: Node 24 added to test matrix (Node 22 + 24)
+
+**Tests:** 2,332 (unchanged).
+
+**Endpoint count:** unchanged at 217.
+
+---
+
+## v0.9.78
 
 Track safety, review flag coverage, and a new assign command.
 

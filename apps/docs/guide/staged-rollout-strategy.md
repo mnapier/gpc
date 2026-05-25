@@ -121,6 +121,10 @@ gpc releases halt \
 
 Halting freezes the rollout at its current percentage. No new users receive the update. Users who already have it keep it.
 
+::: info Rollout percentages cannot decrease
+Google Play does not allow lowering a staged rollout percentage. If you need to slow down, your only option is to halt. Attempting to set a lower percentage returns `API_ROLLOUT_DECREASE_FORBIDDEN`. Halt the rollout, investigate, then either resume from the same percentage or deploy a new version.
+:::
+
 ### Resume a halted rollout
 
 ```bash

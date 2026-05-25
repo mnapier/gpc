@@ -64,7 +64,7 @@ Flags the `AndroidManifest.xml` configurations that cause the fastest rejections
 
 - `android:debuggable="true"` — **critical**. Automatic rejection.
 - `android:testOnly="true"` — **critical**. Automatic rejection.
-- `targetSdkVersion` below the floor — **error**. Floor moves annually; GPC defaults to 35, configurable via `targetSdkMinimum`.
+- `targetSdkVersion` below the floor — **error**. Floor moves annually; GPC defaults to 36 (Android 16, required Aug 31 2026), configurable via `targetSdkMinimum`.
 - Missing `android:exported` on components with intent filters (Android 12+) — **error**. Install fails on target SDK ≥ 31.
 - Missing `foregroundServiceType` on `startForeground()` services (Android 14+) — **error**.
 - `android:usesCleartextTraffic="true"` without a network security config — **warning**.

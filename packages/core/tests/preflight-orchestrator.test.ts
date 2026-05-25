@@ -20,7 +20,7 @@ function cleanManifest(overrides: Partial<ParsedManifest> = {}): ParsedManifest 
     versionCode: 42,
     versionName: "1.0.0",
     minSdk: 24,
-    targetSdk: 35,
+    targetSdk: 36,
     debuggable: false,
     testOnly: false,
     usesCleartextTraffic: false,
@@ -84,7 +84,7 @@ describe("runPreflight orchestrator", () => {
 
   it("respects failOn threshold", async () => {
     mockedReadAab.mockResolvedValue({
-      manifest: cleanManifest({ usesCleartextTraffic: true, targetSdk: 35 }),
+      manifest: cleanManifest({ usesCleartextTraffic: true, targetSdk: 36 }),
       entries: cleanEntries,
     });
 
@@ -156,7 +156,7 @@ describe("runPreflight orchestrator", () => {
       manifest: cleanManifest({
         debuggable: true,
         usesCleartextTraffic: true,
-        targetSdk: 35,
+        targetSdk: 36,
         minSdk: 19,
       }),
       entries: cleanEntries,

@@ -246,8 +246,8 @@ vi.mock("@gpc-cli/core", () => {
     buildLocaleBundle: vi.fn(),
     renderPlayStoreMd: vi.fn(),
     renderPlayStorePrompt: vi.fn(),
-    validateAndCommit: vi.fn().mockResolvedValue(undefined),
-    commitWithRescue: vi.fn().mockResolvedValue(undefined),
+    validateAndCommit: vi.fn().mockResolvedValue({ rescued: false }),
+    commitWithRescue: vi.fn().mockResolvedValue({ rescued: false }),
     sha256File: vi.fn().mockResolvedValue("abc123"),
     syncImages: vi
       .fn()

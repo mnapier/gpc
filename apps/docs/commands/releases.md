@@ -99,6 +99,18 @@ The file is validated before any API calls: existence, extension (.aab/.apk), ZI
 `--rollout` must be between 1–100. Values outside that range exit code 2.
 :::
 
+### Internal Track Uploads
+
+Uploading to the `internal` track skips Google review. GPC sets `reviewSkipped: true` in the output and logs "no Google review required" so this is visible in CI logs.
+
+### Bundle Processing Progress
+
+After uploading, Google processes the bundle server-side before the edit can be committed. GPC logs elapsed time and attempt count to stderr during this wait so you can see progress in CI logs.
+
+### Dry-Run Output
+
+When `--dry-run` is passed, the output includes `executed` and `skipped` arrays listing which steps ran and which were skipped, making it easy to verify what a real run would do.
+
 ### Example
 
 Upload to internal track:
@@ -302,6 +314,10 @@ gpc releases rollout increase --track <track> --to <percent>
 `--to` must be between 1–100. Values outside that range exit code 2.
 :::
 
+::: warning Rollout percentages cannot decrease
+Google Play does not allow lowering a staged rollout percentage. Passing a value lower than the current percentage fails with `API_ROLLOUT_DECREASE_FORBIDDEN`. To slow down a rollout, use `releases rollout halt` first.
+:::
+
 ### Example
 
 ```bash
@@ -502,6 +518,8 @@ When Google Play rejects an app update, the API requires special handling. Attem
 ### Auto-rescue on 403
 
 GPC automatically handles the most common rejected-app scenario. When a commit fails with a `403 changesNotSentForReview` error, GPC retries the commit once with `changesNotSentForReview` set automatically. If the retry succeeds, a warning is printed and the command exits 0. No flag required in most cases.
+
+When auto-rescue triggers, the command output includes `reviewPending: true` and a `nextStep` field explaining that you need to go to Play Console > Publishing overview > Send for review. A console banner repeats this on stderr so it is visible even in non-JSON mode.
 
 ### `--changes-not-sent-for-review`
 

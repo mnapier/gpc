@@ -101,6 +101,10 @@ jobs:
 
   check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22, 24]
+    name: check (node ${{ matrix.node-version }})
     permissions:
       contents: read
     steps:
@@ -110,24 +114,29 @@ jobs:
 
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: "pnpm"
 
       - run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Lockfile integrity hash
+        if: matrix.node-version == 22
         run: shasum -a 256 pnpm-lock.yaml
 
       - name: Audit production dependencies
+        if: matrix.node-version == 22
         run: pnpm audit --prod --audit-level=high
 
       - name: Lint
+        if: matrix.node-version == 22
         run: pnpm lint
 
       - name: Typecheck
+        if: matrix.node-version == 22
         run: pnpm typecheck
 
       - name: Format check
+        if: matrix.node-version == 22
         run: pnpm format:check
 
       - name: Test

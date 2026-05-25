@@ -786,7 +786,15 @@ export type SalesChannel =
   | "PLAY_STORE"
   | "OUTSIDE_PLAY_STORE";
 
+/** @deprecated Use OfferPhaseDetails instead. Sunset: August 31, 2028. */
 export type OfferPhase = "OFFER_PHASE_UNSPECIFIED" | "BASE" | "INTRODUCTORY" | "FREE_TRIAL";
+
+export interface OfferPhaseDetails {
+  baseDetails?: Record<string, unknown>;
+  freeTrialDetails?: Record<string, unknown>;
+  introductoryPriceDetails?: Record<string, unknown>;
+  prorationPeriodDetails?: Record<string, unknown>;
+}
 
 export interface Order {
   orderId: string;
@@ -842,7 +850,9 @@ export interface OrderLineItem {
   subscriptionDetails?: {
     basePlanId?: string;
     offerId?: string;
+    /** @deprecated Use offerPhaseDetails instead. Sunset: August 31, 2028. */
     offerPhase?: OfferPhase;
+    offerPhaseDetails?: OfferPhaseDetails;
     servicePeriodStartTime?: string;
     servicePeriodEndTime?: string;
   };

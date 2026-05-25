@@ -330,10 +330,10 @@ function enhanceApiError(status: number, body: string): ErrorMapping | undefined
   ) {
     return {
       code: "API_EDIT_EXPIRED",
-      message: "The edit session has expired.",
+      message: "Your edit session expired (they last ~1 hour). No data was lost.",
       suggestion: [
-        "Edit sessions last about 1 hour.",
-        "Retry the operation — GPC will open a fresh edit automatically.",
+        "Retrying is safe — GPC will open a fresh edit automatically.",
+        "If uploading large AABs, consider using --status draft to commit later.",
       ].join("\n"),
     };
   }
@@ -373,6 +373,25 @@ function enhanceApiError(status: number, body: string): ErrorMapping | undefined
         "to cancel the existing review and submit new changes.",
         "",
         "To prevent accidental review cancellation in CI, keep --error-if-in-review.",
+      ].join("\n"),
+    };
+  }
+
+  // — Rollout percentage decrease (400/403)
+  if (
+    (status === 400 || status === 403) &&
+    (errorMsg.includes("cannot decrease") ||
+      errorMsg.includes("user fraction") ||
+      errorMsg.includes("userfraction")) &&
+    errorMsg.includes("rollout")
+  ) {
+    return {
+      code: "API_ROLLOUT_DECREASE_FORBIDDEN",
+      message: "Cannot decrease a staged rollout percentage directly.",
+      suggestion: [
+        "To reduce exposure, halt the rollout first, then start a new one:",
+        "  gpc releases halt --track <track>",
+        "  gpc releases rollout --track <track> --percent <target>",
       ].join("\n"),
     };
   }

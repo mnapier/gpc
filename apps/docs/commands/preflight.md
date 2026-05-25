@@ -187,7 +187,7 @@ Create a `.preflightrc.json` in your project root:
 ```json
 {
   "failOn": "error",
-  "targetSdkMinimum": 35,
+  "targetSdkMinimum": 36,
   "maxDownloadSizeMb": 150,
   "allowedPermissions": ["android.permission.READ_SMS"],
   "disabledRules": ["cleartext-traffic"],
@@ -200,7 +200,7 @@ Create a `.preflightrc.json` in your project root:
 | Field                | Type       | Description                                                |
 | -------------------- | ---------- | ---------------------------------------------------------- |
 | `failOn`             | `string`   | Severity threshold: `critical`, `error`, `warning`, `info` |
-| `targetSdkMinimum`   | `number`   | Minimum required targetSdkVersion (default: 35)            |
+| `targetSdkMinimum`   | `number`   | Minimum required targetSdkVersion (default: 36)            |
 | `maxDownloadSizeMb`  | `number`   | Download size warning threshold in MB (default: 150)       |
 | `allowedPermissions` | `string[]` | Permissions to skip (e.g., approved via declaration form)  |
 | `disabledRules`      | `string[]` | Rule IDs to suppress entirely                              |

@@ -18,7 +18,7 @@ describe("loadPreflightConfig", () => {
   it("returns defaults when config file does not exist", async () => {
     const config = await loadPreflightConfig(join(tmpDir, "nonexistent.json"));
     expect(config.failOn).toBe("error");
-    expect(config.targetSdkMinimum).toBe(35);
+    expect(config.targetSdkMinimum).toBe(36);
     expect(config.maxDownloadSizeMb).toBe(150);
     expect(config.allowedPermissions).toEqual([]);
     expect(config.disabledRules).toEqual([]);
@@ -70,7 +70,7 @@ describe("loadPreflightConfig", () => {
     // Invalid failOn should be ignored, keeping default
     expect(config.failOn).toBe("error");
     // Invalid targetSdkMinimum should be ignored
-    expect(config.targetSdkMinimum).toBe(35);
+    expect(config.targetSdkMinimum).toBe(36);
   });
 
   it("handles partial config (only some fields)", async () => {
@@ -86,6 +86,6 @@ describe("loadPreflightConfig", () => {
     expect(config.disabledRules).toEqual(["minSdk-below-21"]);
     // All other fields should keep defaults
     expect(config.failOn).toBe("error");
-    expect(config.targetSdkMinimum).toBe(35);
+    expect(config.targetSdkMinimum).toBe(36);
   });
 });

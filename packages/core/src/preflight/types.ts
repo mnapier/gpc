@@ -117,7 +117,7 @@ export type EntryHeaderMap = Map<string, Buffer>;
 
 export const DEFAULT_PREFLIGHT_CONFIG: PreflightConfig = {
   failOn: "error",
-  targetSdkMinimum: 35,
+  targetSdkMinimum: 36,
   maxDownloadSizeMb: 150,
   allowedPermissions: [],
   disabledRules: [],

@@ -5,6 +5,8 @@ export interface DryRunPreview {
   action: string;
   target: string;
   details?: Record<string, unknown>;
+  executed?: string[];
+  skipped?: string[];
 }
 
 export function isDryRun(program: { opts(): Record<string, unknown> }): boolean {

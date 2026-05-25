@@ -19,13 +19,15 @@ describe("commitWithRescue", () => {
   });
 
   it("commits normally on success", async () => {
-    await commitWithRescue(client, "com.example", "edit1");
+    const result = await commitWithRescue(client, "com.example", "edit1");
+    expect(result.rescued).toBe(false);
     expect(client.edits.commit).toHaveBeenCalledWith("com.example", "edit1", undefined);
   });
 
   it("passes commitOptions through", async () => {
     const opts = { changesInReviewBehavior: "CANCEL_IN_REVIEW_AND_SUBMIT" as const };
-    await commitWithRescue(client, "com.example", "edit1", opts);
+    const result = await commitWithRescue(client, "com.example", "edit1", opts);
+    expect(result.rescued).toBe(false);
     expect(client.edits.commit).toHaveBeenCalledWith("com.example", "edit1", opts);
   });
 
@@ -37,18 +39,16 @@ describe("commitWithRescue", () => {
     );
     vi.mocked(client.edits.commit).mockRejectedValueOnce(rescueError);
 
-    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
-    await commitWithRescue(client, "com.example", "edit1");
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = await commitWithRescue(client, "com.example", "edit1");
 
+    expect(result.rescued).toBe(true);
     expect(client.edits.commit).toHaveBeenCalledTimes(2);
     expect(client.edits.commit).toHaveBeenLastCalledWith("com.example", "edit1", {
       changesNotSentForReview: true,
     });
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("auto-setting"),
-      "AutoRescueWarning",
-    );
-    warnSpy.mockRestore();
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining("NOT sent for review"));
+    errSpy.mockRestore();
   });
 
   it("does not retry if changesNotSentForReview was already set", async () => {
@@ -85,10 +85,10 @@ describe("commitWithRescue", () => {
       .mockRejectedValueOnce(rescueError)
       .mockRejectedValueOnce(retryError);
 
-    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await expect(commitWithRescue(client, "com.example", "edit1")).rejects.toThrow(retryError);
     expect(client.edits.commit).toHaveBeenCalledTimes(2);
-    warnSpy.mockRestore();
+    errSpy.mockRestore();
   });
 
   it("preserves changesInReviewBehavior on rescue retry", async () => {
@@ -99,7 +99,7 @@ describe("commitWithRescue", () => {
     );
     vi.mocked(client.edits.commit).mockRejectedValueOnce(rescueError);
 
-    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await commitWithRescue(client, "com.example", "edit1", {
       changesInReviewBehavior:
         "BLOCK_UNTIL_IN_REVIEW_CHANGES_DONE" as "CANCEL_IN_REVIEW_AND_SUBMIT",
@@ -109,7 +109,7 @@ describe("commitWithRescue", () => {
       changesInReviewBehavior: "BLOCK_UNTIL_IN_REVIEW_CHANGES_DONE",
       changesNotSentForReview: true,
     });
-    warnSpy.mockRestore();
+    errSpy.mockRestore();
   });
 });
 
@@ -121,8 +121,9 @@ describe("validateAndCommit", () => {
   });
 
   it("calls validate then commit on success", async () => {
-    await validateAndCommit(client, "com.example", "edit1");
+    const result = await validateAndCommit(client, "com.example", "edit1");
 
+    expect(result.rescued).toBe(false);
     expect(client.edits.validate).toHaveBeenCalledWith("com.example", "edit1");
     expect(client.edits.commit).toHaveBeenCalledWith("com.example", "edit1", undefined);
   });
@@ -146,12 +147,13 @@ describe("validateAndCommit", () => {
     );
     vi.mocked(client.edits.commit).mockRejectedValueOnce(rescueError);
 
-    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
-    await validateAndCommit(client, "com.example", "edit1");
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = await validateAndCommit(client, "com.example", "edit1");
 
+    expect(result.rescued).toBe(true);
     expect(client.edits.validate).toHaveBeenCalled();
     expect(client.edits.commit).toHaveBeenCalledTimes(2);
-    warnSpy.mockRestore();
+    errSpy.mockRestore();
   });
 
   it("auto-rescues when validate throws API_CHANGES_NOT_SENT_FOR_REVIEW", async () => {
@@ -162,18 +164,16 @@ describe("validateAndCommit", () => {
     );
     vi.mocked(client.edits.validate).mockRejectedValueOnce(rescueError);
 
-    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
-    await validateAndCommit(client, "com.example", "edit1");
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = await validateAndCommit(client, "com.example", "edit1");
 
+    expect(result.rescued).toBe(true);
     expect(client.edits.validate).toHaveBeenCalled();
     expect(client.edits.commit).toHaveBeenCalledWith("com.example", "edit1", {
       changesNotSentForReview: true,
     });
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("auto-setting"),
-      "AutoRescueWarning",
-    );
-    warnSpy.mockRestore();
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining("NOT sent for review"));
+    errSpy.mockRestore();
   });
 
   it("rethrows non-rescue errors from validate", async () => {

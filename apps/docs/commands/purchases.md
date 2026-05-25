@@ -175,6 +175,11 @@ Two new fields on `SubscriptionPurchaseV2` (added in GPC v0.9.76) give visibilit
 - **`onHoldStateContext`** -- present when `subscriptionState` is `SUBSCRIPTION_STATE_ON_HOLD`. Contains `renewalDeclined.pendingOrderId` from the declined renewal.
 - **`inGracePeriodStateContext`** -- present when `subscriptionState` is `SUBSCRIPTION_STATE_IN_GRACE_PERIOD`. Contains `renewalDeclined.pendingOrderId` during the retry window.
 
+GPC v0.9.79 also surfaces two top-level convenience fields so you do not need to drill into the state context objects:
+
+- **`onHoldPendingOrderId`** -- the pending order ID when the subscription is on hold.
+- **`gracePeriodPendingOrderId`** -- the pending order ID when the subscription is in grace period.
+
 A new delayed charging optimization lets low-risk users keep access while payment retries happen in the background. No GPC configuration changes needed.
 :::
 
