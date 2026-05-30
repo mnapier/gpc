@@ -4,6 +4,7 @@ date: 2026-05-30
 description: "npm supply chain attacks compromised hundreds of packages in 2025-2026. Here is every concrete protection a small CLI project shipped, and how you can adopt the same patterns."
 author: Yasser Berrehail
 tags: [security, supply-chain, npm, ci-cd, oidc]
+image: ./npm-supply-chain-cover.png
 ---
 
 <BlogPost />
