@@ -41,16 +41,31 @@ export async function fetchChangelog(options?: FetchChangelogOptions): Promise<C
       signal: controller.signal,
     });
   } catch {
-    throw new GpcError(`Could not fetch changelog.`, "CHANGELOG_FETCH_FAILED", 5, `View online: ${DOCS_CHANGELOG_URL}`);
+    throw new GpcError(
+      `Could not fetch changelog.`,
+      "CHANGELOG_FETCH_FAILED",
+      5,
+      `View online: ${DOCS_CHANGELOG_URL}`,
+    );
   } finally {
     clearTimeout(timer);
   }
 
   if (!response.ok) {
     if (response.status === 404 && options?.version) {
-      throw new GpcError(`Version ${options.version} not found.`, "CHANGELOG_VERSION_NOT_FOUND", 1, `Run: gpc changelog --limit 10`);
+      throw new GpcError(
+        `Version ${options.version} not found.`,
+        "CHANGELOG_VERSION_NOT_FOUND",
+        1,
+        `Run: gpc changelog --limit 10`,
+      );
     }
-    throw new GpcError(`GitHub API returned ${response.status}.`, "CHANGELOG_FETCH_FAILED", 5, `View online: ${DOCS_CHANGELOG_URL}`);
+    throw new GpcError(
+      `GitHub API returned ${response.status}.`,
+      "CHANGELOG_FETCH_FAILED",
+      5,
+      `View online: ${DOCS_CHANGELOG_URL}`,
+    );
   }
 
   const data = await response.json();

@@ -39,6 +39,7 @@ The TanStack attack (May 12, 2026, campaign name "Mini Shai-Hulud") worked like 
 A git-resolved `optionalDependency` delivered the payload: its `prepare` script ran a 2.3 MB credential exfiltrator. Once the cache token was stolen, the PR could be closed. The poisoned cache persisted.
 
 This attack vector is relevant to any project that:
+
 - Runs CI on pull requests from forks
 - Shares build caches between PR and release workflows
 - Uses `npm publish` with a long-lived token
@@ -54,7 +55,7 @@ GPC did all three before we hardened.
 ```yaml
 # .github/workflows/release.yml
 permissions:
-  id-token: write  # Required for OIDC token exchange with npm
+  id-token: write # Required for OIDC token exchange with npm
 
 steps:
   - uses: actions/setup-node@48b55a... # v6 (SHA-pinned)
@@ -64,7 +65,7 @@ steps:
   # npm authenticates via OIDC. No NPM_TOKEN needed.
   - run: pnpm release-staged
     env:
-      NODE_AUTH_TOKEN: ""  # Explicitly empty. OIDC handles auth.
+      NODE_AUTH_TOKEN: "" # Explicitly empty. OIDC handles auth.
 ```
 
 **Setup:** Go to npmjs.com, navigate to each package's settings, and configure Trusted Publisher with your GitHub repo, branch, and workflow file. Takes about 2 minutes per package.
@@ -106,10 +107,7 @@ Most npm supply chain attacks run during `npm install` via postinstall scripts. 
 // package.json
 {
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "turbo",
-      "esbuild"
-    ]
+    "onlyBuiltDependencies": ["turbo", "esbuild"]
   }
 }
 ```
@@ -176,13 +174,13 @@ This is a blunt instrument with a real tradeoff: you cannot adopt urgent securit
 
 **What we did:** Added Socket.dev, CodeQL, `pnpm audit`, and deepsec to the CI pipeline.
 
-| Tool | Trigger | What it catches |
-|------|---------|-----------------|
-| Socket.dev | Every PR | Malicious packages, typosquatting, obfuscated code |
-| `pnpm audit` | Every PR | Known CVEs in production dependencies |
-| CodeQL | Every push | Static analysis (injection, auth bypass) |
-| deepsec | Every push to main | AI-powered security audit (RCE, SSRF, path traversal) |
-| Dependency Review | Every PR | License issues, new dependency risks |
+| Tool              | Trigger            | What it catches                                       |
+| ----------------- | ------------------ | ----------------------------------------------------- |
+| Socket.dev        | Every PR           | Malicious packages, typosquatting, obfuscated code    |
+| `pnpm audit`      | Every PR           | Known CVEs in production dependencies                 |
+| CodeQL            | Every push         | Static analysis (injection, auth bypass)              |
+| deepsec           | Every push to main | AI-powered security audit (RCE, SSRF, path traversal) |
+| Dependency Review | Every PR           | License issues, new dependency risks                  |
 
 Socket.dev is particularly effective against the TanStack-style attack because it detects git-resolved dependencies and obfuscated install scripts, which are the two primary delivery mechanisms.
 
@@ -203,16 +201,16 @@ We also generate a CycloneDX Software Bill of Materials on every release, archiv
 
 Here is every layer in one table:
 
-| # | Protection | What it prevents |
-|---|-----------|------------------|
-| 1 | Trusted Publisher (OIDC) | Stolen NPM_TOKEN publishing malicious packages |
-| 2 | Staged Publishing (2FA) | Compromised CI silently publishing |
-| 3 | `ignore-scripts` + allowlist | Malicious postinstall scripts during install |
-| 4 | SHA-pinned Actions | Tag-swap attacks on GitHub Actions |
-| 5 | PR secret isolation | Fork PRs stealing CI secrets |
-| 6 | `min-release-age=7` | Freshly-published malicious dependency versions |
-| 7 | Socket.dev + pnpm audit + CodeQL + deepsec | Known vulnerabilities and malicious patterns |
-| 8 | Provenance + SBOM | Verifying package origin; tracking dependency history |
+| #   | Protection                                 | What it prevents                                      |
+| --- | ------------------------------------------ | ----------------------------------------------------- |
+| 1   | Trusted Publisher (OIDC)                   | Stolen NPM_TOKEN publishing malicious packages        |
+| 2   | Staged Publishing (2FA)                    | Compromised CI silently publishing                    |
+| 3   | `ignore-scripts` + allowlist               | Malicious postinstall scripts during install          |
+| 4   | SHA-pinned Actions                         | Tag-swap attacks on GitHub Actions                    |
+| 5   | PR secret isolation                        | Fork PRs stealing CI secrets                          |
+| 6   | `min-release-age=7`                        | Freshly-published malicious dependency versions       |
+| 7   | Socket.dev + pnpm audit + CodeQL + deepsec | Known vulnerabilities and malicious patterns          |
+| 8   | Provenance + SBOM                          | Verifying package origin; tracking dependency history |
 
 No single layer is sufficient. The TanStack attack would have bypassed layers 1, 3, 6, 7, and 8. It specifically exploited the gap between layers 4 and 5 (cache poisoning via a PR that had access to write tokens). Defense in depth is not a cliche here. It is the only approach that works.
 
@@ -236,4 +234,4 @@ The npm ecosystem has a supply chain problem. Waiting for npm to solve it is not
 
 ---
 
-*GPC is a TypeScript CLI for the Google Play Developer API. 217 endpoints, 2,343 tests, free to use. [Install](../guide/installation) | [Security model](../advanced/security) | [GitHub](https://github.com/yasserstudio/gpc)*
+_GPC is a TypeScript CLI for the Google Play Developer API. 217 endpoints, 2,343 tests, free to use. [Install](../guide/installation) | [Security model](../advanced/security) | [GitHub](https://github.com/yasserstudio/gpc)_

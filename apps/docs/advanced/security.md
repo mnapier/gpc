@@ -439,23 +439,23 @@ deepsec is run on every PR as of v0.9.74. See the [Automated Security](#automate
 
 GPC v0.9.80 ran a second full-codebase deepsec audit (v2.0.9, Codex gpt-5.5). 94 findings triaged, 15 HIGH/HIGH_BUG addressed:
 
-| #  | Category        | Finding                                                 | Fix                                                     |
-| -- | --------------- | ------------------------------------------------------- | ------------------------------------------------------- |
-| 1  | Config injection | Project `.gpcrc.json` could self-approve plugins        | `approvedPlugins` stripped from project config           |
-| 2  | Shell injection  | `stage-publish.js` interpolated package name into shell | `execFileSync` replaces `execSync` template              |
-| 3  | CI injection     | Release tag interpolated without validation             | Tag validated via regex, passed via `env:` block          |
-| 4  | Supply chain     | Unpinned `npm@latest` and `cdxgen` in release workflow  | Pinned to specific versions                              |
-| 5  | Secret exposure  | Deepsec CI job ran on PRs with secret env vars          | Restricted to push events only                           |
-| 6  | Info disclosure  | Webhook payloads sent unredacted                        | `redactSensitive()` applied before dispatch              |
-| 7  | Info disclosure  | Auth error messages leaked credential content           | Long/suspicious inputs replaced with `<credential-input>` |
-| 8  | Cache collision  | ADC tokens shared constant cache key                    | Hash-based cache key per credential source               |
-| 9  | False negative   | Preflight manifest parse failures passed by default     | Skipped scanners reported in result                      |
-| 10 | State bug        | Watch suppressed breach actions after first cycle       | Breach handler fires every cycle; halt gated separately  |
-| 11 | False negative   | `testOnly` read from wrong manifest element             | Read from `<application>`, not `<manifest>` root          |
-| 12 | False negative   | APK native libraries never checked for 16KB alignment   | `SO_PATH_RE` now matches APK paths                       |
-| 13 | False negative   | Only 256 bytes of ELF read, missing late PT_LOAD        | Header read increased to 4096 bytes                      |
-| 14 | Silent failure   | Status fetch suppressed section errors                  | Errors surfaced in output and JSON                       |
-| 15 | Supply chain     | Generated CI template used unpinned GPC install         | `--ignore-scripts` added to generated templates          |
+| #   | Category         | Finding                                                 | Fix                                                       |
+| --- | ---------------- | ------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | Config injection | Project `.gpcrc.json` could self-approve plugins        | `approvedPlugins` stripped from project config            |
+| 2   | Shell injection  | `stage-publish.js` interpolated package name into shell | `execFileSync` replaces `execSync` template               |
+| 3   | CI injection     | Release tag interpolated without validation             | Tag validated via regex, passed via `env:` block          |
+| 4   | Supply chain     | Unpinned `npm@latest` and `cdxgen` in release workflow  | Pinned to specific versions                               |
+| 5   | Secret exposure  | Deepsec CI job ran on PRs with secret env vars          | Restricted to push events only                            |
+| 6   | Info disclosure  | Webhook payloads sent unredacted                        | `redactSensitive()` applied before dispatch               |
+| 7   | Info disclosure  | Auth error messages leaked credential content           | Long/suspicious inputs replaced with `<credential-input>` |
+| 8   | Cache collision  | ADC tokens shared constant cache key                    | Hash-based cache key per credential source                |
+| 9   | False negative   | Preflight manifest parse failures passed by default     | Skipped scanners reported in result                       |
+| 10  | State bug        | Watch suppressed breach actions after first cycle       | Breach handler fires every cycle; halt gated separately   |
+| 11  | False negative   | `testOnly` read from wrong manifest element             | Read from `<application>`, not `<manifest>` root          |
+| 12  | False negative   | APK native libraries never checked for 16KB alignment   | `SO_PATH_RE` now matches APK paths                        |
+| 13  | False negative   | Only 256 bytes of ELF read, missing late PT_LOAD        | Header read increased to 4096 bytes                       |
+| 14  | Silent failure   | Status fetch suppressed section errors                  | Errors surfaced in output and JSON                        |
+| 15  | Supply chain     | Generated CI template used unpinned GPC install         | `--ignore-scripts` added to generated templates           |
 
 Post-fix deepsec re-scan: 0 new findings, 24 previously-open findings marked Fixed.
 

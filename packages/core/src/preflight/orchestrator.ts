@@ -92,10 +92,22 @@ export async function runPreflight(options: PreflightOptions): Promise<Preflight
 
     let skip = false;
     for (const req of scanner.requires) {
-      if (req === "manifest" && !ctx.manifest) { skip = true; break; }
-      if (req === "zipEntries" && !ctx.zipEntries) { skip = true; break; }
-      if (req === "metadataDir" && !ctx.metadataDir) { skip = true; break; }
-      if (req === "sourceDir" && !ctx.sourceDir) { skip = true; break; }
+      if (req === "manifest" && !ctx.manifest) {
+        skip = true;
+        break;
+      }
+      if (req === "zipEntries" && !ctx.zipEntries) {
+        skip = true;
+        break;
+      }
+      if (req === "metadataDir" && !ctx.metadataDir) {
+        skip = true;
+        break;
+      }
+      if (req === "sourceDir" && !ctx.sourceDir) {
+        skip = true;
+        break;
+      }
     }
 
     if (skip) {

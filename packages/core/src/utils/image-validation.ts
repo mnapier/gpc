@@ -75,4 +75,3 @@ export async function validateImage(
 
   return { valid: errors.length === 0, errors, warnings };
 }
-
