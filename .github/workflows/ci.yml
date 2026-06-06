@@ -80,10 +80,10 @@ jobs:
           node-version: 22
           cache: "pnpm"
 
-      - run: pnpm install --frozen-lockfile --ignore-scripts
-
       - name: Deep security scan
+        working-directory: .deepsec
         run: |
+          pnpm install --ignore-scripts
           npx deepsec scan
           npx deepsec process
           npx deepsec revalidate
@@ -96,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: deepsec-findings
-          path: deepsec-results.json
+          path: .deepsec/deepsec-results.json
           retention-days: 30
 
   check:
