@@ -724,7 +724,13 @@ describe("project config plugin trust gate", () => {
 
   beforeEach(async () => {
     tmpDir = await mkdtemp(join(tmpdir(), "gpc-trust-"));
-    envBackup = saveEnv("GPC_APP", "GPC_OUTPUT", "GPC_PROFILE", "GPC_SERVICE_ACCOUNT", "XDG_CONFIG_HOME");
+    envBackup = saveEnv(
+      "GPC_APP",
+      "GPC_OUTPUT",
+      "GPC_PROFILE",
+      "GPC_SERVICE_ACCOUNT",
+      "XDG_CONFIG_HOME",
+    );
     for (const k of ["GPC_APP", "GPC_OUTPUT", "GPC_PROFILE", "GPC_SERVICE_ACCOUNT"]) {
       delete process.env[k];
     }
@@ -828,21 +834,19 @@ describe("profile name validation", () => {
   });
 
   it("rejects __proto__ as profile name", async () => {
-    await expect(
-      setProfileConfig("__proto__", { app: "com.evil" }),
-    ).rejects.toThrow(/Invalid profile name/);
+    await expect(setProfileConfig("__proto__", { app: "com.evil" })).rejects.toThrow(
+      /Invalid profile name/,
+    );
   });
 
   it("rejects constructor as profile name", async () => {
-    await expect(
-      setProfileConfig("constructor", { app: "com.evil" }),
-    ).rejects.toThrow(/Invalid profile name/);
+    await expect(setProfileConfig("constructor", { app: "com.evil" })).rejects.toThrow(
+      /Invalid profile name/,
+    );
   });
 
   it("rejects empty string as profile name", async () => {
-    await expect(
-      setProfileConfig("", { app: "com.evil" }),
-    ).rejects.toThrow(/Invalid profile name/);
+    await expect(setProfileConfig("", { app: "com.evil" })).rejects.toThrow(/Invalid profile name/);
   });
 
   it("accepts valid profile names", async () => {

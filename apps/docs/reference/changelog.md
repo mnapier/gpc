@@ -25,6 +25,7 @@ The GPC GitHub Action, plus a credential-precedence fix.
 Full-codebase security audit, Google API alignment, and code quality pass.
 
 **Security (15 fixes):**
+
 - fix: project `.gpcrc.json` can no longer self-approve plugins (bypass the user trust gate)
 - fix: shell injection in staged-publish npm version check
 - fix: CI hardening -- release tag validation, pinned npm/cdxgen versions, deepsec restricted to push events
@@ -42,6 +43,7 @@ Full-codebase security audit, Google API alignment, and code quality pass.
 - feat: plugin permissions are now enforced at hook registration time (not just validated)
 
 **API alignment (13 fixes, discovery doc rev 20260520):**
+
 - fix: `canceledStateContext` -- nest `cancelTime` inside `userInitiatedCancellation` to match Google's schema
 - fix: `outOfAppPurchaseContext` -- replace incorrect `externalTransactionToken` with `expiredPurchaseToken`
 - fix: `signupPromotion` -- replace flat `{promotionType, promotionCode}` with nested `{oneTimeCode, vanityCode}`
@@ -53,6 +55,7 @@ Full-codebase security audit, Google API alignment, and code quality pass.
 - feat: `Grant.name`, `buyOption.legacyCompatible`/`multiQuantityEnabled`, `rentOption.expirationPeriod`, `replacementMode`, tax compliance fields
 
 **Code quality (20 fixes):**
+
 - fix: `bundles.list` and `tracks.list` null-safety (prevented crash on empty apps)
 - feat: `download()` now retries with exponential backoff (matches `request()` pattern)
 - fix: 10 sites of `|| []` standardized to `?? []` for correct null-coalescing
