@@ -23,7 +23,8 @@ import { isDryRun, printDryRun } from "../dry-run.js";
 import { requireConfirm } from "../prompt.js";
 import { readJsonFile } from "../json.js";
 
-async function readJsonArray<T = unknown>(filePath: string): Promise<T[]> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function readJsonArray<T = any>(filePath: string): Promise<T[]> {
   const data = await readJsonFile(filePath);
   if (!Array.isArray(data)) {
     const err = new Error(`Expected a JSON array in ${filePath}, got ${typeof data}`);
@@ -401,9 +402,9 @@ export function registerOneTimeProductsCommands(program: Command): void {
         options.purchaseOption,
         requests.map((r: Record<string, unknown>) => ({
           packageName,
-          productId: r.productId || productId,
-          purchaseOptionId: r.purchaseOptionId || "-",
-          offerId: r.offerId,
+          productId: (r["productId"] as string) || productId,
+          purchaseOptionId: (r["purchaseOptionId"] as string) || "-",
+          offerId: r["offerId"] as string,
         })),
       );
       console.log(formatOutput(result, format));

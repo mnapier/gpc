@@ -45,5 +45,6 @@ export interface ResolvedConfig extends Required<Pick<GpcConfig, "output">> {
   profiles?: Record<string, ProfileConfig>;
   approvedPlugins?: string[];
   webhooks?: WebhookConfig;
+  vitals?: { thresholds?: VitalsThresholds };
   debug?: boolean;
 }
