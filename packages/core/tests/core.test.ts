@@ -1920,7 +1920,18 @@ describe("listReviews", () => {
     client.reviews.list.mockResolvedValue({ reviews });
 
     const result = await listReviews(client, PKG);
-    expect(result).toHaveLength(2);
+    expect(result.reviews).toHaveLength(2);
+  });
+
+  it("surfaces the nextPageToken from the single-page response", async () => {
+    const client = mockClient();
+    client.reviews.list.mockResolvedValue({
+      reviews: [makeReview()],
+      tokenPagination: { nextPageToken: "PAGE2" },
+    });
+
+    const result = await listReviews(client, PKG);
+    expect(result.nextPageToken).toBe("PAGE2");
   });
 
   it("filters by star rating", async () => {
@@ -1930,8 +1941,8 @@ describe("listReviews", () => {
     });
 
     const result = await listReviews(client, PKG, { stars: 1 });
-    expect(result).toHaveLength(1);
-    expect(result[0].reviewId).toBe("r2");
+    expect(result.reviews).toHaveLength(1);
+    expect(result.reviews[0].reviewId).toBe("r2");
   });
 
   it("filters by language", async () => {
@@ -1941,8 +1952,8 @@ describe("listReviews", () => {
     });
 
     const result = await listReviews(client, PKG, { language: "ja" });
-    expect(result).toHaveLength(1);
-    expect(result[0].reviewId).toBe("r2");
+    expect(result.reviews).toHaveLength(1);
+    expect(result.reviews[0].reviewId).toBe("r2");
   });
 
   it("filters by since date", async () => {
@@ -1955,8 +1966,8 @@ describe("listReviews", () => {
     });
 
     const result = await listReviews(client, PKG, { since: "2023-11-14T00:00:00Z" });
-    expect(result).toHaveLength(1);
-    expect(result[0].reviewId).toBe("r1");
+    expect(result.reviews).toHaveLength(1);
+    expect(result.reviews[0].reviewId).toBe("r1");
   });
 
   it("passes translationLanguage to API", async () => {
@@ -2869,6 +2880,17 @@ describe("purchases commands", () => {
     const result = await listVoidedPurchases(client, "com.example");
     expect(client.purchases.listVoided).toHaveBeenCalledWith("com.example", undefined);
     expect(result.voidedPurchases).toEqual([]);
+  });
+
+  it("listVoidedPurchases normalizes tokenPagination to a top-level nextPageToken", async () => {
+    const client = mockClient();
+    client.purchases.listVoided.mockResolvedValue({
+      voidedPurchases: [{ orderId: "o1" }],
+      tokenPagination: { nextPageToken: "TKN" },
+    });
+    const result = await listVoidedPurchases(client, "com.example");
+    expect(result.voidedPurchases).toHaveLength(1);
+    expect(result.nextPageToken).toBe("TKN");
   });
 
   it("refundOrder calls client.orders.refund", async () => {

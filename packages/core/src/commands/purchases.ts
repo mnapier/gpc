@@ -151,7 +151,13 @@ export async function listVoidedPurchases(
     );
     return { voidedPurchases: result.items, nextPageToken: result.nextPageToken };
   }
-  return client.purchases.listVoided(packageName, options);
+  // Default (single-page) path: normalize the token to the top level so callers
+  // and the CLI envelope surface it consistently with the paginated path.
+  const resp = await client.purchases.listVoided(packageName, options);
+  return {
+    voidedPurchases: resp.voidedPurchases || [],
+    nextPageToken: resp.tokenPagination?.nextPageToken,
+  };
 }
 
 export async function refundOrder(

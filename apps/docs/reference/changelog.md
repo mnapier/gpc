@@ -11,7 +11,22 @@ head:
 
 All notable user-facing changes to GPC are documented here. For full release details, see the [GitHub Releases](https://github.com/yasserstudio/gpc/releases) page.
 
-## v0.9.82 <Badge type="tip" text="latest" />
+## v0.9.83 <Badge type="tip" text="latest" />
+
+Response and usage quality: paginated lists resume correctly, and `list` output is more consistent and faithful than the raw Google Play API.
+
+- fix: `list` commands can now page past the first batch. `paginateAll` was always returning an empty continuation token, so `--limit` with `--next-page` could not advance (reviews, users, purchases, iap, subscriptions). The voided-purchases default path also no longer drops its token.
+- feat: `list --json` now returns a consistent envelope -- the items under their named key (`reviews`, `users`, `subscriptions`, ...), a `nextPageToken` (`null` when there are no more pages), a `meta.count`, and a `message` when empty. Human output gains a "more results" footer. **Breaking:** `reviews` and `iap` `list --json` previously returned a bare array; scripts using `jq '.[]'` should switch to `jq '.reviews[]'` (or the matching key).
+- fix: Google's `"package not found"` 404 now maps to `API_APP_NOT_FOUND` (previously fell through to the generic code), and unmapped HTTP statuses now carry a message and a suggestion.
+- feat: money is formatted using each currency's ISO 4217 minor unit (JPY shows 0 decimals, KWD/BHD 3) instead of always assuming 2.
+- feat: `reviews list` adds `hasReply` and `lang` columns, an explicit `[truncated]` marker, and a `--full-text` flag for untruncated text.
+- fix: CSV and TSV exports neutralize spreadsheet formula injection (cells starting with `= + - @`).
+
+**Tests:** 2,372 (+27 net).
+
+---
+
+## v0.9.82
 
 Dependency health, docs alignment, and lint cleanup.
 

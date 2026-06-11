@@ -142,6 +142,44 @@ describe("paginateAll", () => {
 
     expect(result.items).toEqual([]);
   });
+
+  it("returns a continuation token when stopped by limit (regression: was always undefined)", async () => {
+    const fetchPage = vi
+      .fn()
+      .mockResolvedValueOnce({ items: [1, 2, 3], nextPageToken: "page2" })
+      .mockResolvedValueOnce({ items: [4, 5, 6], nextPageToken: "page3" });
+
+    const result = await paginateAll(fetchPage, { limit: 4 });
+
+    expect(result.items).toEqual([1, 2, 3, 4]);
+    // Previously this was always undefined, breaking `--limit` + `--next-page`.
+    expect(result.nextPageToken).toBe("page3");
+  });
+
+  it("returns the page-boundary token when limit lands exactly on a boundary", async () => {
+    const fetchPage = vi
+      .fn()
+      .mockResolvedValueOnce({ items: [1, 2], nextPageToken: "page2" })
+      .mockResolvedValueOnce({ items: [3, 4], nextPageToken: "page3" });
+
+    const result = await paginateAll(fetchPage, { limit: 2 });
+
+    expect(result.items).toEqual([1, 2]);
+    expect(result.nextPageToken).toBe("page2");
+    expect(fetchPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns undefined token when fully exhausted", async () => {
+    const fetchPage = vi
+      .fn()
+      .mockResolvedValueOnce({ items: [1, 2], nextPageToken: "page2" })
+      .mockResolvedValueOnce({ items: [3, 4], nextPageToken: undefined });
+
+    const result = await paginateAll(fetchPage);
+
+    expect(result.items).toEqual([1, 2, 3, 4]);
+    expect(result.nextPageToken).toBeUndefined();
+  });
 });
 
 describe("paginateParallel", () => {

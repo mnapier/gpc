@@ -6,6 +6,9 @@ export {
   redactSensitive,
   SENSITIVE_KEYS,
   maybePaginate,
+  annotateListResult,
+  moreResultsFooter,
+  formatMoney,
 } from "./output.js";
 export type { CommandContext } from "./context.js";
 export { PluginManager, discoverPlugins } from "./plugins.js";

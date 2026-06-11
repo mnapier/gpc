@@ -26,6 +26,8 @@ import {
   formatOutput,
   sortResults,
   maybePaginate,
+  annotateListResult,
+  moreResultsFooter,
 } from "@gpc-cli/core";
 import { getOutputFormat } from "../format.js";
 import { isDryRun, printDryRun } from "../dry-run.js";
@@ -71,9 +73,18 @@ export function registerSubscriptionsCommands(program: Command): void {
           firstBasePlanState: s.basePlans?.[0]?.state || "-",
         }));
         await maybePaginate(formatOutput(summary, format));
+        const footer = moreResultsFooter(result.nextPageToken);
+        if (footer) console.log(footer);
       } else {
         await maybePaginate(
-          formatOutput(subs.length === 0 ? { subscriptions: [] } : result, format),
+          formatOutput(
+            annotateListResult(
+              { ...result, subscriptions: subs },
+              "subscriptions",
+              "No subscriptions found",
+            ),
+            format,
+          ),
         );
       }
     });

@@ -19,6 +19,9 @@ import {
   getOrderDetails,
   batchGetOrders,
   formatOutput,
+  annotateListResult,
+  moreResultsFooter,
+  formatMoney,
 } from "@gpc-cli/core";
 import { isDryRun, printDryRun } from "../dry-run.js";
 import { getOutputFormat } from "../format.js";
@@ -333,11 +336,18 @@ export function registerPurchasesCommands(program: Command): void {
             voidedReason: p["voidedReason"] ?? "-",
           }));
           console.log(formatOutput(rows, format));
+          const footer = moreResultsFooter(result.nextPageToken);
+          if (footer) console.log(footer);
         } else {
           console.log("No voided purchases found.");
         }
       } else {
-        console.log(formatOutput(result, format));
+        console.log(
+          formatOutput(
+            annotateListResult(result, "voidedPurchases", "No voided purchases found"),
+            format,
+          ),
+        );
       }
     });
 
@@ -394,9 +404,7 @@ export function registerPurchasesCommands(program: Command): void {
           purchaseToken: result.purchaseToken ? result.purchaseToken.slice(0, 16) + "..." : "-",
           createTime: result.createTime || "-",
           total: result.total
-            ? `${result.total.units || "0"}.${String(result.total.nanos || 0)
-                .padStart(9, "0")
-                .slice(0, 2)} ${result.total.currencyCode}`
+            ? `${formatMoney(result.total.units, result.total.nanos, result.total.currencyCode)} ${result.total.currencyCode}`
             : "-",
           lineItems: result.lineItems?.length || 0,
         };

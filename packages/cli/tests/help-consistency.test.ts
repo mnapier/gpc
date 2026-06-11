@@ -70,7 +70,7 @@ vi.mock("@gpc-cli/core", () => {
     deleteImage: vi.fn().mockResolvedValue(undefined),
     exportImages: vi.fn().mockResolvedValue({}),
     getCountryAvailability: vi.fn().mockResolvedValue({}),
-    listReviews: vi.fn().mockResolvedValue([]),
+    listReviews: vi.fn().mockResolvedValue({ reviews: [] }),
     getReview: vi.fn().mockResolvedValue({}),
     replyToReview: vi.fn().mockResolvedValue({}),
     exportReviews: vi.fn().mockResolvedValue("[]"),

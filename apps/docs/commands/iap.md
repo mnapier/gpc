@@ -51,7 +51,7 @@ gpc iap list --app com.example.myapp
 
 ```json
 {
-  "inappproduct": [
+  "oneTimeProducts": [
     {
       "sku": "coins_100",
       "status": "active",
@@ -61,9 +61,15 @@ gpc iap list --app com.example.myapp
         "en-US": { "title": "100 Coins", "description": "A pack of 100 coins" }
       }
     }
-  ]
+  ],
+  "nextPageToken": null,
+  "meta": { "count": 1 }
 }
 ```
+
+::: info List output shape (v0.9.83+)
+`list` commands return a JSON envelope: the items under their named key, a `nextPageToken` (`null` when there are no more pages), a `meta.count`, and a `message` when empty. Earlier versions returned a bare array — switch `jq '.[]'` to `jq '.oneTimeProducts[]'`.
+:::
 
 Paginate results:
 

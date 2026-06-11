@@ -201,6 +201,40 @@ describe("createHttpClient", () => {
     }
   });
 
+  it("maps Google's 'Package not found' message to API_APP_NOT_FOUND", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ error: { message: "Package not found: com.example.app." } }, 404),
+    );
+
+    const client = createHttpClient({ auth: mockAuth(), maxRetries: 0 });
+
+    try {
+      await client.get("/com.example.app/edits");
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(PlayApiError);
+      // Previously fell through to the generic API_NOT_FOUND because the matcher
+      // only checked "application not found"; Google actually says "Package not found".
+      expect((err as PlayApiError).code).toBe("API_APP_NOT_FOUND");
+    }
+  });
+
+  it("attaches a message and suggestion to unmapped status codes", async () => {
+    mockFetch.mockResolvedValueOnce(mockResponse({ error: "teapot" }, 418));
+
+    const client = createHttpClient({ auth: mockAuth(), maxRetries: 0 });
+
+    try {
+      await client.get("/com.example.app/edits");
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(PlayApiError);
+      expect((err as PlayApiError).code).toBe("API_HTTP_418");
+      expect((err as PlayApiError).message).toContain("HTTP 418");
+      expect((err as PlayApiError).suggestion).toContain("gpc doctor");
+    }
+  });
+
   it("strips HTML from error body on 404", async () => {
     const htmlBody =
       "<!DOCTYPE html><html><body><h1>Not Found</h1><p>The requested URL was not found.</p></body></html>";
@@ -1731,7 +1765,9 @@ describe("HTTP error paths and methods", () => {
       expect(err).toBeInstanceOf(PlayApiError);
       expect(err.code).toBe("API_HTTP_422");
       expect(err.statusCode).toBe(422);
-      expect(err.suggestion).toBeUndefined();
+      // Unmapped statuses now carry an actionable message + suggestion.
+      expect(err.message).toContain("HTTP 422");
+      expect(err.suggestion).toContain("gpc doctor");
     }
   });
 

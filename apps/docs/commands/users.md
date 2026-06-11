@@ -86,9 +86,15 @@ gpc users list --developer-id 1234567890
         }
       ]
     }
-  ]
+  ],
+  "nextPageToken": null,
+  "meta": { "count": 2 }
 }
 ```
+
+::: info List output shape (v0.9.83+)
+`list` commands return a JSON envelope: items under their named key, a `nextPageToken` (`null` when there are no more pages), a `meta.count`, and a `message` when empty. Earlier versions returned a bare array — switch `jq '.[]'` to `jq '.users[]'`.
+:::
 
 ---
 

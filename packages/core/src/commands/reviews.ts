@@ -23,12 +23,13 @@ export async function listReviews(
   client: PlayApiClient,
   packageName: string,
   options?: ReviewsFilterOptions,
-): Promise<Review[]> {
+): Promise<{ reviews: Review[]; nextPageToken?: string }> {
   let reviews: Review[];
+  let nextPageToken: string | undefined;
 
   if (options?.all) {
     // Auto-paginate all pages
-    const { items } = await paginateAll<Review>(
+    const { items, nextPageToken: token } = await paginateAll<Review>(
       async (pageToken) => {
         const apiOptions: ReviewsListOptions = { token: pageToken };
         if (options?.translationLanguage)
@@ -43,6 +44,7 @@ export async function listReviews(
       { limit: options?.limit },
     );
     reviews = items;
+    nextPageToken = token;
   } else {
     // Single page (default)
     const apiOptions: ReviewsListOptions = {};
@@ -52,6 +54,7 @@ export async function listReviews(
 
     const response = await client.reviews.list(packageName, apiOptions);
     reviews = response.reviews || [];
+    nextPageToken = response.tokenPagination?.nextPageToken;
   }
 
   // Client-side filters
@@ -77,7 +80,7 @@ export async function listReviews(
     });
   }
 
-  return reviews;
+  return { reviews, nextPageToken };
 }
 
 export async function getReview(
@@ -200,7 +203,7 @@ export async function analyzeReviews(
   packageName: string,
   options?: ReviewsFilterOptions,
 ): Promise<ReviewAnalysis> {
-  const reviews = await listReviews(client, packageName, options);
+  const { reviews } = await listReviews(client, packageName, options);
 
   const items = reviews.map((r) => {
     const uc = r.comments?.[0]?.userComment;

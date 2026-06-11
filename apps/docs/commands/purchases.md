@@ -307,6 +307,10 @@ gpc purchases voided \
   --max-results 50
 ```
 
+::: info List output shape (v0.9.83+)
+`purchases voided --json` returns a JSON envelope: `voidedPurchases`, a `nextPageToken` (`null` when there are no more pages), a `meta.count`, and a `message` when empty. Switch `jq '.[]'` to `jq '.voidedPurchases[]'`.
+:::
+
 ---
 
 ## `purchases orders refund`

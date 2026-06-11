@@ -14,6 +14,8 @@ import {
   PERMISSION_PROPAGATION_WARNING,
   formatOutput,
   sortResults,
+  annotateListResult,
+  moreResultsFooter,
   GpcError,
 } from "@gpc-cli/core";
 import { getOutputFormat } from "../format.js";
@@ -80,9 +82,11 @@ export function registerUsersCommands(program: Command): void {
                 : 0,
           }));
           console.log(formatOutput(rows, format));
+          const footer = moreResultsFooter(result.nextPageToken);
+          if (footer) console.log(footer);
         }
       } else {
-        console.log(formatOutput(result, format));
+        console.log(formatOutput(annotateListResult(result, "users", "No users found"), format));
       }
     });
 

@@ -45,6 +45,91 @@ export function formatOutput(data: unknown, format: OutputFormat, redact = true)
 }
 
 // ---------------------------------------------------------------------------
+// List result helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Annotate a list command's --json envelope with a consistent shape: a
+ * `meta.count`, a `nextPageToken` (null when absent so the field is always
+ * present), and a `message` when the result set is empty. The descriptive items
+ * key (e.g. `users`, `reviews`) is preserved as-is.
+ */
+export function annotateListResult(
+  result: object,
+  itemsKey: string,
+  emptyMessage: string,
+): Record<string, unknown> {
+  const source = result as Record<string, unknown>;
+  const items = Array.isArray(source[itemsKey]) ? (source[itemsKey] as unknown[]) : [];
+  const annotated: Record<string, unknown> = {
+    ...source,
+    nextPageToken: source["nextPageToken"] ?? null,
+    meta: { count: items.length },
+  };
+  if (items.length === 0) annotated["message"] = emptyMessage;
+  return annotated;
+}
+
+/**
+ * Footer line shown after a human-readable list table when more results are
+ * available. Returns undefined when there is no continuation token.
+ */
+export function moreResultsFooter(nextPageToken?: string | null): string | undefined {
+  if (!nextPageToken) return undefined;
+  return dim(`More results available. Re-run this command with --next-page ${nextPageToken}`);
+}
+
+// Currencies whose ISO 4217 minor unit differs from the common 2 decimals.
+const CURRENCY_DECIMALS: Record<string, number> = {
+  // Zero-decimal currencies
+  JPY: 0,
+  KRW: 0,
+  VND: 0,
+  CLP: 0,
+  ISK: 0,
+  XAF: 0,
+  XOF: 0,
+  XPF: 0,
+  BIF: 0,
+  DJF: 0,
+  GNF: 0,
+  KMF: 0,
+  RWF: 0,
+  UGX: 0,
+  VUV: 0,
+  PYG: 0,
+  // Three-decimal currencies
+  BHD: 3,
+  IQD: 3,
+  JOD: 3,
+  KWD: 3,
+  LYD: 3,
+  OMR: 3,
+  TND: 3,
+};
+
+/**
+ * Format a Google Money amount (`units` + `nanos`) honoring the currency's ISO
+ * 4217 minor-unit count (JPY has 0 decimals, KWD/BHD/OMR have 3, most have 2)
+ * rather than assuming 2. The currency code is used only to pick the precision;
+ * it is not appended -- callers place the code where they need it. `nanos` are
+ * billionths of a unit; the leading digits are truncated to match prior output.
+ */
+export function formatMoney(
+  units: string | number | undefined,
+  nanos: number | undefined,
+  currencyCode?: string,
+): string {
+  const decimals = currencyCode ? (CURRENCY_DECIMALS[currencyCode.toUpperCase()] ?? 2) : 2;
+  const whole = String(units ?? "0");
+  if (decimals === 0) return whole;
+  const frac = String(Math.abs(nanos ?? 0))
+    .padStart(9, "0")
+    .slice(0, decimals);
+  return `${whole}.${frac}`;
+}
+
+// ---------------------------------------------------------------------------
 // Sensitive field redaction
 // ---------------------------------------------------------------------------
 
@@ -260,10 +345,14 @@ function formatMarkdown(data: unknown): string {
 }
 
 function escapeCsvField(val: string): string {
-  if (val.includes(",") || val.includes('"') || val.includes("\n") || val.includes("\r")) {
-    return `"${val.replace(/"/g, '""')}"`;
+  // Neutralize spreadsheet formula injection: a cell beginning with = + - @ (or
+  // tab/CR) can execute when the CSV is opened in Excel/Google Sheets. Prefix
+  // such a value with a single quote so the spreadsheet treats it as text.
+  let out = /^[=+\-@\t\r]/.test(val) ? `'${val}` : val;
+  if (out.includes(",") || out.includes('"') || out.includes("\n") || out.includes("\r")) {
+    out = `"${out.replace(/"/g, '""')}"`;
   }
-  return val;
+  return out;
 }
 
 function formatCsv(data: unknown): string {
@@ -292,8 +381,11 @@ function formatTsv(data: unknown): string {
   const keys = Object.keys(firstRow);
   if (keys.length === 0) return "";
 
-  const escape = (val: string): string =>
-    val.replace(/\t/g, "\\t").replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+  const escape = (val: string): string => {
+    // Same formula-injection guard as CSV (see escapeCsvField).
+    const guarded = /^[=+\-@]/.test(val) ? `'${val}` : val;
+    return guarded.replace(/\t/g, "\\t").replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+  };
 
   const header = keys.join("\t");
   const body = rows

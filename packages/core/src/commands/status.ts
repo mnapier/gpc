@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
-import type { PlayApiClient } from "@gpc-cli/api";
+import type { PlayApiClient, Review } from "@gpc-cli/api";
 import type { ReportingApiClient } from "@gpc-cli/api";
 import { getCacheDir } from "@gpc-cli/config";
 import { GpcError } from "../errors.js";
@@ -244,10 +244,7 @@ function toVitalMetric(
 // Reviews helpers
 // ---------------------------------------------------------------------------
 
-function computeReviewSentiment(
-  reviews: Awaited<ReturnType<typeof listReviews>>,
-  windowDays: number,
-): StatusReviews {
+function computeReviewSentiment(reviews: Review[], windowDays: number): StatusReviews {
   const now = Date.now();
   const DAY_MS = 24 * 60 * 60 * 1000;
   const windowMs = windowDays * DAY_MS;
@@ -336,7 +333,7 @@ export async function getAppStatus(
       : Promise.resolve(SKIPPED_VITAL),
     sections.has("reviews")
       ? listReviews(client, packageName, { maxResults: 500 })
-      : Promise.resolve([]),
+      : Promise.resolve({ reviews: [] as Review[] }),
   ]);
 
   const sectionErrors: string[] = [];
@@ -365,7 +362,7 @@ export async function getAppStatus(
   if (slowRenderResult.status === "rejected")
     sectionErrors.push(`vitals/slowRender: ${String(slowRenderResult.reason)}`);
 
-  const rawReviews = reviewsResult.status === "fulfilled" ? reviewsResult.value : [];
+  const rawReviews = reviewsResult.status === "fulfilled" ? reviewsResult.value.reviews : [];
   if (reviewsResult.status === "rejected")
     sectionErrors.push(`reviews: ${String(reviewsResult.reason)}`);
   const reviews = computeReviewSentiment(rawReviews, reviewDays);

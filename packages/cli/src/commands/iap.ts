@@ -13,6 +13,8 @@ import {
   formatOutput,
   sortResults,
   createSpinner,
+  annotateListResult,
+  moreResultsFooter,
 } from "@gpc-cli/core";
 import { isDryRun, printDryRun } from "../dry-run.js";
 import { getOutputFormat } from "../format.js";
@@ -46,7 +48,26 @@ export function registerIapCommands(program: Command): void {
       if (options.sort) {
         products = sortResults(products, options.sort);
       }
-      console.log(formatOutput(products, format));
+      if (format !== "json") {
+        if (products.length === 0) {
+          console.log("No in-app products found.");
+        } else {
+          console.log(formatOutput(products, format));
+          const footer = moreResultsFooter(result.nextPageToken);
+          if (footer) console.log(footer);
+        }
+      } else {
+        console.log(
+          formatOutput(
+            annotateListResult(
+              { oneTimeProducts: products, nextPageToken: result.nextPageToken },
+              "oneTimeProducts",
+              "No in-app products found",
+            ),
+            format,
+          ),
+        );
+      }
     });
 
   iap

@@ -1,5 +1,20 @@
 # @gpc-cli/core
 
+## 0.9.69
+
+### Patch Changes
+
+- Response & usage quality: list commands now resume correctly and return a consistent, more faithful shape than the raw Google Play API.
+  - fix(api): `paginateAll` now returns a real page-granular continuation token instead of always `undefined`, so `--limit` + `--next-page` can advance past the first batch (reviews, users, purchases, iap, subscriptions). Also fixes voided-purchases dropping its token on the default path.
+  - feat(cli): `list` commands return a consistent JSON envelope `{ <key>, nextPageToken, meta.count, message? }` and print a "more results" footer in human mode. **Breaking:** `reviews`/`iap` `list --json` no longer return a bare array (`jq '.[]'` -> `jq '.reviews[]'`).
+  - fix(api): map Google's actual `"package not found"` 404 to `API_APP_NOT_FOUND`, and attach a message + suggestion to previously-unmapped HTTP statuses.
+  - feat(core): `formatMoney` honors ISO 4217 minor units (JPY=0, KWD/BHD=3) instead of assuming 2 decimals.
+  - feat(cli): `reviews list` gains `hasReply`/`lang` columns, an explicit `[truncated]` marker, and a `--full-text` flag.
+  - fix(core): CSV/TSV exports neutralize spreadsheet formula injection (cells leading with `= + - @`).
+
+- Updated dependencies
+  - @gpc-cli/api@1.0.43
+
 ## 0.9.60
 
 ### Patch Changes

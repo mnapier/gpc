@@ -94,7 +94,7 @@ vi.mock("@gpc-cli/core", () => {
     getCountryAvailability: vi.fn().mockResolvedValue({}),
     updateAppDetails: vi.fn().mockResolvedValue({}),
     getAppInfo: vi.fn().mockResolvedValue({}),
-    listReviews: vi.fn().mockResolvedValue([]),
+    listReviews: vi.fn().mockResolvedValue({ reviews: [] }),
     getReview: vi.fn().mockResolvedValue({}),
     replyToReview: vi.fn().mockResolvedValue({}),
     exportReviews: vi.fn().mockResolvedValue("[]"),

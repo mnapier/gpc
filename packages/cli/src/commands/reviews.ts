@@ -11,6 +11,8 @@ import {
   formatOutput,
   maybePaginate,
   sortResults,
+  annotateListResult,
+  moreResultsFooter,
   GpcError,
 } from "@gpc-cli/core";
 import { getOutputFormat } from "../format.js";
@@ -34,6 +36,7 @@ export function registerReviewsCommands(program: Command): void {
     .option("--next-page <token>", "Resume from page token")
     .option("--all", "Auto-paginate to fetch all reviews (API returns last 7 days only)")
     .option("--sort <field>", "Sort by field (prefix with - for descending)")
+    .option("--full-text", "Show full review text in table output (not truncated)")
     .action(async (options) => {
       const config = await loadConfig();
       const packageName = resolvePackageName(program.opts()["app"], config);
@@ -50,21 +53,26 @@ export function registerReviewsCommands(program: Command): void {
         nextPage: options.nextPage,
         all: options.all,
       });
-      if (Array.isArray(result) && result.length === 0 && format !== "json") {
-        console.log("No reviews found.");
-        return;
-      }
-      const sorted = sortResults(result, options.sort);
-      if (format !== "json" && Array.isArray(sorted)) {
+      const sorted = sortResults(result.reviews, options.sort);
+      if (format !== "json") {
+        if (sorted.length === 0) {
+          console.log("No reviews found.");
+          return;
+        }
         const rows = sorted.map((r: unknown) => {
           const rv = r as Record<string, unknown>;
           const comments = rv["comments"] as Record<string, unknown>[] | undefined;
           const userComment = comments?.[0]?.["userComment"] as Record<string, unknown> | undefined;
+          const hasReply = comments?.some((c) => c["developerComment"]) ? "yes" : "no";
+          const fullText = String(userComment?.["text"] || "-");
+          const truncated = !options.fullText && fullText.length > 80;
           return {
             reviewId: rv["reviewId"] || "-",
             author: rv["authorName"] || "-",
+            lang: userComment?.["reviewerLanguage"] || "-",
             stars: userComment?.["starRating"] || "-",
-            text: String(userComment?.["text"] || "-").slice(0, 80),
+            text: truncated ? fullText.slice(0, 80) + "... [truncated]" : fullText,
+            hasReply,
             lastModified: userComment?.["lastModified"]
               ? String((userComment["lastModified"] as Record<string, unknown>)?.["seconds"] || "-")
               : "-",
@@ -72,8 +80,19 @@ export function registerReviewsCommands(program: Command): void {
           };
         });
         await maybePaginate(formatOutput(rows, format));
+        const footer = moreResultsFooter(result.nextPageToken);
+        if (footer) console.log(footer);
       } else {
-        await maybePaginate(formatOutput(sorted, format));
+        console.log(
+          formatOutput(
+            annotateListResult(
+              { reviews: sorted, nextPageToken: result.nextPageToken },
+              "reviews",
+              "No reviews found",
+            ),
+            format,
+          ),
+        );
       }
     });
 

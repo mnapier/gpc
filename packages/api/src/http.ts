@@ -190,7 +190,9 @@ function enhanceApiError(status: number, body: string): ErrorMapping | undefined
     status === 404 &&
     (errorMsg.includes("applicationnotfound") ||
       errorMsg.includes("no application was found") ||
-      errorMsg.includes("application not found"))
+      errorMsg.includes("application not found") ||
+      // Google's actual wording for an unknown/inaccessible app (observed live).
+      errorMsg.includes("package not found"))
   ) {
     return {
       code: "API_APP_NOT_FOUND",
@@ -443,7 +445,12 @@ function mapStatusToError(
           suggestion: "Google Play API server error. GPC will retry automatically.",
         };
       }
-      return { code: `API_HTTP_${status}` };
+      return {
+        code: `API_HTTP_${status}`,
+        message: `Unexpected Google Play API response (HTTP ${status}).`,
+        suggestion:
+          "Run gpc doctor to check your setup. If this persists, re-run with --verbose and report the output.",
+      };
   }
 }
 

@@ -39,21 +39,42 @@ export async function paginateAll<TItem>(
   fetchPage: (pageToken?: string) => Promise<{ items: TItem[]; nextPageToken?: string }>,
   options?: PaginateOptions,
 ): Promise<{ items: TItem[]; nextPageToken?: string }> {
-  const allItems: TItem[] = [];
-  let lastPageToken: string | undefined;
   const limit = options?.limit;
+  const allItems: TItem[] = [];
+  let pageToken = options?.startPageToken;
 
-  for await (const items of paginate(fetchPage, options)) {
+  // Track the continuation token directly here rather than delegating to the
+  // `paginate` generator, which yields item arrays and therefore cannot surface
+  // the page token when it stops. Returning a usable token lets callers resume
+  // a limited list (e.g. `--limit N --next-page <token>`).
+  for (;;) {
+    const page = await fetchPage(pageToken);
+    const items = page.items;
+
+    // No items: exhausted (or an empty page). Nothing left to resume from.
+    if (items.length === 0) {
+      return { items: allItems, nextPageToken: undefined };
+    }
+
+    if (limit !== undefined && allItems.length + items.length >= limit) {
+      // This page reaches the limit. Take exactly what's needed and stop.
+      const remaining = limit - allItems.length;
+      allItems.push(...items.slice(0, remaining));
+      // Page-granular continuation: resume from the page after this one. If the
+      // limit truncated this page mid-way, the remainder is not included in the
+      // continuation -- use the no-limit / auto-paginate path for gapless
+      // traversal. This matches the Google API's page-token model.
+      return { items: allItems, nextPageToken: page.nextPageToken };
+    }
+
     allItems.push(...items);
-    if (limit !== undefined && allItems.length >= limit) break;
-  }
 
-  // If we stopped due to limit, try to get the next page token for resumption
-  if (limit !== undefined && allItems.length >= limit) {
-    lastPageToken = undefined; // Already truncated by paginate
+    // Genuinely exhausted: the last page carried no continuation token.
+    if (!page.nextPageToken) {
+      return { items: allItems, nextPageToken: undefined };
+    }
+    pageToken = page.nextPageToken;
   }
-
-  return { items: allItems, nextPageToken: lastPageToken };
 }
 
 /**

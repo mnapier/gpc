@@ -2,7 +2,7 @@ import { resolvePackageName, getClient } from "../resolve.js";
 import type { Command } from "commander";
 import { loadConfig } from "@gpc-cli/config";
 
-import { convertRegionPrices, formatOutput } from "@gpc-cli/core";
+import { convertRegionPrices, formatOutput, formatMoney } from "@gpc-cli/core";
 import { getOutputFormat } from "../format.js";
 
 export function registerPricingCommands(program: Command): void {
@@ -49,14 +49,14 @@ export function registerPricingCommands(program: Command): void {
           if (prices) {
             const rows = Object.entries(prices).map(([region, data]) => {
               const money = data["price"] as Record<string, unknown> | undefined;
-              const units = money?.["units"] || "0";
-              const nanos = String(money?.["nanos"] || 0)
-                .padStart(9, "0")
-                .slice(0, 2);
               return {
                 region,
                 price: money
-                  ? `${units}.${nanos}`
+                  ? formatMoney(
+                      money["units"] as string | undefined,
+                      money["nanos"] as number | undefined,
+                      money["currencyCode"] as string | undefined,
+                    )
                   : data["priceMicros"]
                     ? String(Number(data["priceMicros"]) / 1_000_000)
                     : "-",

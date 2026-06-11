@@ -30,17 +30,18 @@ gpc reviews list [options]
 
 ### Options
 
-| Flag             | Short | Type     | Default | Description                                    |
-| ---------------- | ----- | -------- | ------- | ---------------------------------------------- |
-| `--stars`        |       | `number` |         | Filter by star rating (1-5)                    |
-| `--lang`         |       | `string` |         | Filter by reviewer language code               |
-| `--since`        |       | `string` |         | Filter reviews after date (ISO 8601)           |
-| `--translate-to` |       | `string` |         | Translate reviews to this language             |
-| `--max`          |       | `number` |         | Maximum results per page                       |
-| `--limit`        |       | `number` |         | Maximum total results                          |
-| `--next-page`    |       | `string` |         | Resume from pagination token                   |
-| `--all`          |       | flag     |         | Auto-paginate to fetch all reviews             |
-| `--sort`         |       | `string` |         | Sort by field (prefix with `-` for descending) |
+| Flag             | Short | Type     | Default | Description                                           |
+| ---------------- | ----- | -------- | ------- | ----------------------------------------------------- |
+| `--stars`        |       | `number` |         | Filter by star rating (1-5)                           |
+| `--lang`         |       | `string` |         | Filter by reviewer language code                      |
+| `--since`        |       | `string` |         | Filter reviews after date (ISO 8601)                  |
+| `--translate-to` |       | `string` |         | Translate reviews to this language                    |
+| `--max`          |       | `number` |         | Maximum results per page                              |
+| `--limit`        |       | `number` |         | Maximum total results                                 |
+| `--next-page`    |       | `string` |         | Resume from pagination token                          |
+| `--all`          |       | flag     |         | Auto-paginate to fetch all reviews                    |
+| `--sort`         |       | `string` |         | Sort by field (prefix with `-` for descending)        |
+| `--full-text`    |       | flag     |         | Show full review text in table output (not truncated) |
 
 ::: info Production only
 The Google Play API only returns reviews for production releases, and only reviews from the last 7 days.
@@ -90,13 +91,16 @@ gpc reviews list \
       ]
     }
   ],
-  "tokenPagination": {
-    "nextPageToken": "abc123"
-  }
+  "nextPageToken": "abc123",
+  "meta": { "count": 1 }
 }
 ```
 
-Paginate through results:
+::: info List output shape (v0.9.83+)
+`list` commands return a consistent JSON envelope: the items under their named key (`reviews`, `users`, `subscriptions`, ...), a `nextPageToken` (`null` when there are no more pages), a `meta.count`, and a `message` when the result set is empty. Earlier versions returned a bare array — scripts using `jq '.[]'` should switch to `jq '.reviews[]'`.
+:::
+
+When a `nextPageToken` is present, paginate through results by re-running the command with it:
 
 ```bash
 gpc reviews list --app com.example.myapp --max 10 --next-page abc123
