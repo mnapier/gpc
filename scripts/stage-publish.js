@@ -111,10 +111,36 @@ export function assertNoWorkspaceProtocol(pkgJson) {
   }
 }
 
+/**
+ * Return true if the already-published manifest of `name@version` still carries
+ * a `workspace:` specifier in any dependency field (including peerDependencies).
+ * Such a package can only be fixed by a version bump + republish — skipping it
+ * silently is how a transitive leak survives a release (GH #61 follow-up: api's
+ * peerDependency leaked even after cli/core were fixed). Network/parse failures
+ * return false so a release is never blocked by a flaky `npm view`.
+ */
+export function publishedManifestLeaks(name, version) {
+  try {
+    const out = execFileSync("npm", ["view", `${name}@${version}`, "--json"], {
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "ignore"],
+    });
+    const manifest = JSON.parse(out);
+    for (const field of DEP_FIELDS) {
+      const deps = manifest[field];
+      if (deps && JSON.stringify(deps).includes(`"${WORKSPACE_PREFIX}`)) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function main() {
   const versionMap = buildVersionMap(PACKAGES);
   let staged = 0;
   let skipped = 0;
+  const leakedSkips = [];
 
   for (const pkg of PACKAGES) {
     const pkgPath = join(pkg, "package.json");
@@ -133,7 +159,16 @@ function main() {
     }
 
     if (registryVersion === version) {
-      console.log(`skip: ${name}@${version} (already published)`);
+      if (publishedManifestLeaks(name, version)) {
+        leakedSkips.push(`${name}@${version}`);
+        console.warn(
+          `WARNING: ${name}@${version} is already published but its manifest still ` +
+            `contains a workspace: specifier. Bump its version to republish a fixed ` +
+            `manifest, or installs of packages depending on it will fail.`,
+        );
+      } else {
+        console.log(`skip: ${name}@${version} (already published)`);
+      }
       skipped++;
       continue;
     }
@@ -171,6 +206,12 @@ function main() {
   }
 
   console.log(`\nDone: ${staged} staged, ${skipped} skipped`);
+  if (leakedSkips.length > 0) {
+    console.error(
+      `\nACTION REQUIRED: ${leakedSkips.length} already-published package(s) still leak the ` +
+        `workspace: protocol and need a version bump to fix: ${leakedSkips.join(", ")}`,
+    );
+  }
   if (staged > 0) {
     console.log(
       "Approve staged packages at: https://www.npmjs.com/settings/gpc-cli/staged-packages",

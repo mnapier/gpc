@@ -11,7 +11,17 @@ head:
 
 All notable user-facing changes to GPC are documented here. For full release details, see the [GitHub Releases](https://github.com/yasserstudio/gpc/releases) page.
 
-## v0.9.84 <Badge type="tip" text="latest" />
+## v0.9.85 <Badge type="tip" text="latest" />
+
+Completes the v0.9.84 install fix.
+
+- fix: `npm install -g @gpc-cli/cli` now installs cleanly. v0.9.84 resolved the workspace references in `@gpc-cli/cli` and `@gpc-cli/core`, but `@gpc-cli/api` had not changed version and so was not republished — its existing package still referenced an internal package that a fresh install could not resolve. This release republishes it (and the packages that depend on it) with concrete versions.
+
+**Tests:** 2,380 (unchanged).
+
+---
+
+## v0.9.84
 
 Install fix and regional pricing control.
 

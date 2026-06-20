@@ -7,6 +7,14 @@ Versioning: `0.9.x` pre-release series → `1.0.0` public launch.
 
 ---
 
+## v0.9.85
+
+Completes the v0.9.84 install fix.
+
+- fix: `npm install -g @gpc-cli/cli` now installs cleanly. v0.9.84 resolved the internal workspace references in `@gpc-cli/cli` and `@gpc-cli/core`, but `@gpc-cli/api` was unchanged and so was not republished — its already-published manifest still carried a `workspace:` reference (in `peerDependencies`) that a fresh install could not resolve. `@gpc-cli/api` (and the packages depending on it) are republished with concrete versions. The publish step now also warns when an unchanged, already-published package still leaks the workspace protocol.
+
+---
+
 ## v0.9.84
 
 Install fix and regional pricing control.

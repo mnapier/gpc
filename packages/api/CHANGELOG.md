@@ -1,5 +1,13 @@
 # @gpc-cli/api
 
+## 1.0.44
+
+### Patch Changes
+
+- Fix the remaining `npm install` failure: `@gpc-cli/api` leaked `workspace:*` in its `peerDependencies`.
+
+  v0.9.84 fixed `@gpc-cli/cli` and `@gpc-cli/core`, but `@gpc-cli/api` had not changed version, so it was skipped during publishing and its already-published manifest still carried `"@gpc-cli/auth": "workspace:*"` in `peerDependencies` — which a fresh `npm install -g @gpc-cli/cli` still could not resolve. This release republishes `@gpc-cli/api` (and bumps `core`/`cli` to depend on it) with the specifier resolved to a concrete version. The staged-publish step now also warns when an already-published, unchanged package still leaks the workspace protocol, so this can't be missed again.
+
 ## 1.0.43
 
 ### Patch Changes
