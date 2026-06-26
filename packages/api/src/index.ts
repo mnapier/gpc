@@ -5,12 +5,7 @@ export type { ReportingApiClient } from "./reporting-client.js";
 export { createUsersClient } from "./users-client.js";
 export type { UsersApiClient, GrantsListResponse } from "./users-client.js";
 export { createGamesClient } from "./games-client.js";
-export type {
-  GamesApiClient,
-  Leaderboard,
-  LeaderboardScore,
-  Achievement,
-} from "./games-client.js";
+export type { GamesApiClient, Leaderboard, LeaderboardScore, Achievement } from "./games-client.js";
 export { createGamesConfigClient } from "./games-config-client.js";
 export type {
   GamesConfigClient,

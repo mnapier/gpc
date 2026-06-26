@@ -129,19 +129,12 @@ export async function diffAchievementConfig(
   validateResourceId(achievementId, "achievement");
   const remote = await client.achievements.get(achievementId);
   const diffs: GameConfigDiff[] = [];
-  const fields = [
-    "achievementType",
-    "initialState",
-    "stepsToUnlock",
-    "draft",
-  ];
+  const fields = ["achievementType", "initialState", "stepsToUnlock", "draft"];
   for (const field of fields) {
     const localVal = JSON.stringify(
       (localData as unknown as Record<string, unknown>)[field] ?? null,
     );
-    const remoteVal = JSON.stringify(
-      (remote as unknown as Record<string, unknown>)[field] ?? null,
-    );
+    const remoteVal = JSON.stringify((remote as unknown as Record<string, unknown>)[field] ?? null);
     if (localVal !== remoteVal) {
       diffs.push({ field, local: localVal, remote: remoteVal });
     }
@@ -207,9 +200,7 @@ export async function diffLeaderboardConfig(
     const localVal = JSON.stringify(
       (localData as unknown as Record<string, unknown>)[field] ?? null,
     );
-    const remoteVal = JSON.stringify(
-      (remote as unknown as Record<string, unknown>)[field] ?? null,
-    );
+    const remoteVal = JSON.stringify((remote as unknown as Record<string, unknown>)[field] ?? null);
     if (localVal !== remoteVal) {
       diffs.push({ field, local: localVal, remote: remoteVal });
     }

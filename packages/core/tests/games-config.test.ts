@@ -104,32 +104,20 @@ describe("games config commands", () => {
 
     it("getAchievementConfig rejects empty ID", async () => {
       const client = mockConfigClient();
-      await expect(getAchievementConfig(client, "")).rejects.toThrow(
-        "achievement ID is required",
-      );
+      await expect(getAchievementConfig(client, "")).rejects.toThrow("achievement ID is required");
     });
 
     it("createAchievementConfig passes data to insert", async () => {
       const client = mockConfigClient();
-      const result = await createAchievementConfig(
-        client,
-        "123456",
-        SAMPLE_ACHIEVEMENT,
-      );
-      expect(client.achievements.insert).toHaveBeenCalledWith(
-        "123456",
-        SAMPLE_ACHIEVEMENT,
-      );
+      const result = await createAchievementConfig(client, "123456", SAMPLE_ACHIEVEMENT);
+      expect(client.achievements.insert).toHaveBeenCalledWith("123456", SAMPLE_ACHIEVEMENT);
       expect(result.id).toBe("ach-new");
     });
 
     it("updateAchievementConfig passes data to update", async () => {
       const client = mockConfigClient();
       await updateAchievementConfig(client, "ach-1", SAMPLE_ACHIEVEMENT);
-      expect(client.achievements.update).toHaveBeenCalledWith(
-        "ach-1",
-        SAMPLE_ACHIEVEMENT,
-      );
+      expect(client.achievements.update).toHaveBeenCalledWith("ach-1", SAMPLE_ACHIEVEMENT);
     });
 
     it("deleteAchievementConfig calls delete with correct ID", async () => {
@@ -155,11 +143,7 @@ describe("games config commands", () => {
         ...SAMPLE_ACHIEVEMENT,
         id: "ach-1",
       });
-      const diffs = await diffAchievementConfig(
-        client,
-        "ach-1",
-        SAMPLE_ACHIEVEMENT,
-      );
+      const diffs = await diffAchievementConfig(client, "ach-1", SAMPLE_ACHIEVEMENT);
       expect(diffs).toEqual([]);
     });
   });
@@ -199,32 +183,20 @@ describe("games config commands", () => {
 
     it("getLeaderboardConfig rejects empty ID", async () => {
       const client = mockConfigClient();
-      await expect(getLeaderboardConfig(client, "")).rejects.toThrow(
-        "leaderboard ID is required",
-      );
+      await expect(getLeaderboardConfig(client, "")).rejects.toThrow("leaderboard ID is required");
     });
 
     it("createLeaderboardConfig passes data to insert", async () => {
       const client = mockConfigClient();
-      const result = await createLeaderboardConfig(
-        client,
-        "123456",
-        SAMPLE_LEADERBOARD,
-      );
-      expect(client.leaderboards.insert).toHaveBeenCalledWith(
-        "123456",
-        SAMPLE_LEADERBOARD,
-      );
+      const result = await createLeaderboardConfig(client, "123456", SAMPLE_LEADERBOARD);
+      expect(client.leaderboards.insert).toHaveBeenCalledWith("123456", SAMPLE_LEADERBOARD);
       expect(result.id).toBe("lb-new");
     });
 
     it("updateLeaderboardConfig passes data to update", async () => {
       const client = mockConfigClient();
       await updateLeaderboardConfig(client, "lb-1", SAMPLE_LEADERBOARD);
-      expect(client.leaderboards.update).toHaveBeenCalledWith(
-        "lb-1",
-        SAMPLE_LEADERBOARD,
-      );
+      expect(client.leaderboards.update).toHaveBeenCalledWith("lb-1", SAMPLE_LEADERBOARD);
     });
 
     it("deleteLeaderboardConfig calls delete with correct ID", async () => {
@@ -250,11 +222,7 @@ describe("games config commands", () => {
         ...SAMPLE_LEADERBOARD,
         id: "lb-1",
       });
-      const diffs = await diffLeaderboardConfig(
-        client,
-        "lb-1",
-        SAMPLE_LEADERBOARD,
-      );
+      const diffs = await diffLeaderboardConfig(client, "lb-1", SAMPLE_LEADERBOARD);
       expect(diffs).toEqual([]);
     });
   });

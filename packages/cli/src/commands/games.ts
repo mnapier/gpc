@@ -34,12 +34,8 @@ import { getOutputFormat } from "../format.js";
 import { requireConfirm } from "../prompt.js";
 import { readJsonFile } from "../json.js";
 
-function resolveGameId(
-  flag: string | undefined,
-  config: ResolvedConfig,
-): string {
-  const gameId =
-    flag ?? process.env["GPC_GAME_ID"] ?? config.games?.applicationId;
+function resolveGameId(flag: string | undefined, config: ResolvedConfig): string {
+  const gameId = flag ?? process.env["GPC_GAME_ID"] ?? config.games?.applicationId;
   if (!gameId) {
     throw new GpcError(
       "Game application ID is required. Pass --game-id, set GPC_GAME_ID, or add games.applicationId to .gpcrc.json.",
@@ -58,9 +54,7 @@ async function getGamesClient(config: { auth?: { serviceAccount?: string } }) {
   return createGamesClient({ auth });
 }
 
-async function getGamesConfigClientFromConfig(config: {
-  auth?: { serviceAccount?: string };
-}) {
+async function getGamesConfigClientFromConfig(config: { auth?: { serviceAccount?: string } }) {
   const auth = await resolveAuth({
     serviceAccountPath: config.auth?.serviceAccount,
   });
@@ -70,9 +64,7 @@ async function getGamesConfigClientFromConfig(config: {
 export function registerGamesCommands(program: Command): void {
   const games = program
     .command("games")
-    .description(
-      "Manage Play Games Services — achievements, leaderboards (configuration API)",
-    )
+    .description("Manage Play Games Services — achievements, leaderboards (configuration API)")
     .option("--game-id <id>", "Games application ID (numeric)");
 
   /* ---------------------------------------------------------------- */
@@ -403,9 +395,7 @@ export function registerGamesCommands(program: Command): void {
 
   leaderboards
     .command("diff <leaderboard-id>")
-    .description(
-      "Compare local JSON against remote leaderboard configuration",
-    )
+    .description("Compare local JSON against remote leaderboard configuration")
     .requiredOption("--file <path>", "JSON file with local leaderboard data")
     .action(async (leaderboardId: string, options) => {
       const config = await loadConfig();

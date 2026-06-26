@@ -89,10 +89,10 @@ gpc bundle analyze app.aab --threshold 150
 
 ### Monetization Extras
 
-| Command                        | Description                                             |
-| ------------------------------ | ------------------------------------------------------- |
-| [`system-apks`](./system-apks) | System APK variants for OEM/enterprise deployments      |
-| [`rtdn`](./rtdn)               | Real-Time Developer Notifications (Pub/Sub webhooks)    |
+| Command                        | Description                                                         |
+| ------------------------------ | ------------------------------------------------------------------- |
+| [`system-apks`](./system-apks) | System APK variants for OEM/enterprise deployments                  |
+| [`rtdn`](./rtdn)               | Real-Time Developer Notifications (Pub/Sub webhooks)                |
 | [`games`](./games)             | Play Games Services: achievement and leaderboard configuration CRUD |
 
 ### Release Automation

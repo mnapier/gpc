@@ -32,7 +32,7 @@ gpc reviews list --stars 1-2 --since 7d
 | **Testers**             | `testers list`, `testers add`, `testers import`                      | Track-scoped tester management, CSV bulk import                              |
 | **Users**               | `users list`, `users invite`, `users update`                         | Developer account user and permission management                             |
 | **Managed Google Play** | `enterprise publish`, `enterprise create`                            | Private apps for enterprise customers (first publishing CLI to support this) |
-| **Games**             | `games achievements list`, `games leaderboards create`               | Achievement and leaderboard configuration CRUD via Games Configuration API   |
+| **Games**               | `games achievements list`, `games leaderboards create`               | Achievement and leaderboard configuration CRUD via Games Configuration API   |
 | **Bundle**              | `bundle analyze`, `bundle compare`                                   | AAB/APK size analysis, cross-build comparison, CI size gates                 |
 
 Plus: device tiers, internal sharing, data safety, recovery actions, external transactions, and more. See the [full command reference](/commands/) or the [Glossary](/glossary/) for Play Store terminology.

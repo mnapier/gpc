@@ -294,10 +294,7 @@ export {
   deleteLeaderboardConfig,
   diffLeaderboardConfig,
 } from "./commands/games.js";
-export type {
-  ListGamesConfigOptions,
-  GameConfigDiff,
-} from "./commands/games.js";
+export type { ListGamesConfigOptions, GameConfigDiff } from "./commands/games.js";
 export { createEnterpriseApp, publishEnterpriseApp } from "./commands/enterprise.js";
 export type { CreateEnterpriseAppParams } from "./commands/enterprise.js";
 export type { TrainConfig, TrainState } from "./commands/train.js";

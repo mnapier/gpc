@@ -19,6 +19,7 @@ gpc games [--game-id <id>] <subcommand>
 Games application ID (numeric). Found in Play Console under **Play Games Services > Setup**.
 
 Resolution order:
+
 1. `--game-id` flag
 2. `GPC_GAME_ID` environment variable
 3. `games.applicationId` in `.gpcrc.json`
@@ -45,10 +46,10 @@ gpc games achievements list --limit 10 --next-page <token>
 gpc games achievements list --json
 ```
 
-| Flag | Description |
-| --- | --- |
-| `--limit <n>` | Maximum results per page |
-| `--next-page <token>` | Resume from page token |
+| Flag                  | Description              |
+| --------------------- | ------------------------ |
+| `--limit <n>`         | Maximum results per page |
+| `--next-page <token>` | Resume from page token   |
 
 ### `games achievements get <achievement-id>`
 
@@ -75,14 +76,10 @@ Example `achievement.json`:
   "initialState": "HIDDEN",
   "draft": {
     "name": {
-      "translations": [
-        { "locale": "en-US", "value": "First Victory" }
-      ]
+      "translations": [{ "locale": "en-US", "value": "First Victory" }]
     },
     "description": {
-      "translations": [
-        { "locale": "en-US", "value": "Win your first match" }
-      ]
+      "translations": [{ "locale": "en-US", "value": "Win your first match" }]
     },
     "pointValue": 10
   }
@@ -129,10 +126,10 @@ gpc games leaderboards list
 gpc games leaderboards list --limit 10 --json
 ```
 
-| Flag | Description |
-| --- | --- |
-| `--limit <n>` | Maximum results per page |
-| `--next-page <token>` | Resume from page token |
+| Flag                  | Description              |
+| --------------------- | ------------------------ |
+| `--limit <n>`         | Maximum results per page |
+| `--next-page <token>` | Resume from page token   |
 
 ### `games leaderboards get <leaderboard-id>`
 
@@ -157,9 +154,7 @@ Example `leaderboard.json`:
   "scoreOrder": "LARGER_IS_BETTER",
   "draft": {
     "name": {
-      "translations": [
-        { "locale": "en-US", "value": "High Scores" }
-      ]
+      "translations": [{ "locale": "en-US", "value": "High Scores" }]
     },
     "scoreFormat": {
       "numberFormatType": "NUMERIC"

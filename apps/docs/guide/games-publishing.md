@@ -93,6 +93,7 @@ gpc games leaderboards create --file leaderboards/high-scores.json
 ```
 
 Score format types:
+
 - `NUMERIC` -- plain number (points, count)
 - `TIME_DURATION` -- milliseconds displayed as time
 - `CURRENCY` -- monetary value (requires `currencyCode`)
@@ -121,7 +122,7 @@ name: Sync Games Config
 on:
   push:
     branches: [main]
-    paths: ['games/**']
+    paths: ["games/**"]
 
 jobs:
   sync:
@@ -147,6 +148,7 @@ jobs:
 ## Draft vs Published
 
 The Configuration API uses a draft/published model:
+
 - **draft**: editable, visible only to testers
 - **published**: live, read-only via this API
 

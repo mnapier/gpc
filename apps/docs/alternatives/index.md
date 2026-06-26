@@ -10,26 +10,26 @@ This page compares every actively maintained option as of May 2026.
 
 ## At a Glance
 
-|                              | **GPC**                        | **Fastlane supply**  | **gradle-play-publisher** | **Go-based CLIs** |
-| ---------------------------- | ------------------------------ | -------------------- | ------------------------- | ----------------- |
-| Language                     | TypeScript                     | Ruby                 | Kotlin                    | Go                |
-| API coverage                 | **227 endpoints**              | ~20                  | ~15                       | ~80               |
-| Runtime                      | Node.js or standalone binary   | Ruby + Bundler       | Gradle / JVM              | Single binary     |
-| Cold start                   | <500ms                         | 2-3s                 | 5-10s (Gradle boot)       | <100ms            |
-| Standalone use               | Yes                            | Yes                  | No (Gradle plugin)        | Yes               |
-| Reviews and vitals           | Yes                            | No                   | No                        | No                |
-| Subscriptions and IAP        | Yes                            | No                   | No                        | No                |
-| **Managed Google Play**      | **Yes (first CLI to support)** | No                   | No                        | No                |
-| Play Games config            | Yes (achievements + leaderboards CRUD) | No         | No                        | No                |
-| Preflight scanner            | **9 offline policy checks**    | No                   | No                        | No                |
-| Rollout monitoring           | **`gpc watch` with auto-halt** | No                   | No                        | No                |
-| Multilingual release notes   | **AI-assisted translation**    | No                   | No                        | No                |
-| CI/CD integration            | JSON + exit codes (0-6)        | Partial              | Gradle tasks              | Basic             |
-| Plugin system                | Yes (lifecycle hooks, SDK)     | Actions              | No                        | No                |
-| SDK / library use            | Yes (@gpc-cli/api)             | No                   | No                        | No                |
-| Test suite                   | 2,413 tests, 90%+ coverage     | Community-maintained | Kotlin tests              | Minimal           |
-| Image sync (SHA-256 diffing) | Yes (shipped v0.9.69)          | Yes                  | No                        | No                |
-| Upload progress reporting    | Yes (shipped v0.9.69)          | No                   | Yes (progress callbacks)  | No                |
+|                              | **GPC**                                | **Fastlane supply**  | **gradle-play-publisher** | **Go-based CLIs** |
+| ---------------------------- | -------------------------------------- | -------------------- | ------------------------- | ----------------- |
+| Language                     | TypeScript                             | Ruby                 | Kotlin                    | Go                |
+| API coverage                 | **227 endpoints**                      | ~20                  | ~15                       | ~80               |
+| Runtime                      | Node.js or standalone binary           | Ruby + Bundler       | Gradle / JVM              | Single binary     |
+| Cold start                   | <500ms                                 | 2-3s                 | 5-10s (Gradle boot)       | <100ms            |
+| Standalone use               | Yes                                    | Yes                  | No (Gradle plugin)        | Yes               |
+| Reviews and vitals           | Yes                                    | No                   | No                        | No                |
+| Subscriptions and IAP        | Yes                                    | No                   | No                        | No                |
+| **Managed Google Play**      | **Yes (first CLI to support)**         | No                   | No                        | No                |
+| Play Games config            | Yes (achievements + leaderboards CRUD) | No                   | No                        | No                |
+| Preflight scanner            | **9 offline policy checks**            | No                   | No                        | No                |
+| Rollout monitoring           | **`gpc watch` with auto-halt**         | No                   | No                        | No                |
+| Multilingual release notes   | **AI-assisted translation**            | No                   | No                        | No                |
+| CI/CD integration            | JSON + exit codes (0-6)                | Partial              | Gradle tasks              | Basic             |
+| Plugin system                | Yes (lifecycle hooks, SDK)             | Actions              | No                        | No                |
+| SDK / library use            | Yes (@gpc-cli/api)                     | No                   | No                        | No                |
+| Test suite                   | 2,413 tests, 90%+ coverage             | Community-maintained | Kotlin tests              | Minimal           |
+| Image sync (SHA-256 diffing) | Yes (shipped v0.9.69)                  | Yes                  | No                        | No                |
+| Upload progress reporting    | Yes (shipped v0.9.69)                  | No                   | Yes (progress callbacks)  | No                |
 
 ## How to Choose a Google Play CLI
 

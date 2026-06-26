@@ -1,8 +1,7 @@
 import { createHttpClient } from "./http.js";
 import type { ApiClientOptions } from "./types.js";
 
-const GAMES_CONFIG_BASE_URL =
-  "https://gamesconfiguration.googleapis.com/games/v1configuration";
+const GAMES_CONFIG_BASE_URL = "https://gamesconfiguration.googleapis.com/games/v1configuration";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -129,9 +128,7 @@ export interface GamesConfigClient {
 
 const p = (segment: string): string => encodeURIComponent(segment);
 
-export function createGamesConfigClient(
-  options: ApiClientOptions,
-): GamesConfigClient {
+export function createGamesConfigClient(options: ApiClientOptions): GamesConfigClient {
   const http = createHttpClient({ ...options, baseUrl: GAMES_CONFIG_BASE_URL });
 
   return {
