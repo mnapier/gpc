@@ -164,6 +164,58 @@ describe("permissionsScanner", () => {
     expect(findings.find((f) => f.ruleId === "contacts-permission-broad")).toBeUndefined();
   });
 
+  it("cites the October 28, 2026 enforcement date in contacts finding", async () => {
+    const findings = await permissionsScanner.scan(makeCtx(["android.permission.READ_CONTACTS"]));
+    const f = findings.find((f) => f.ruleId === "contacts-permission-broad");
+    expect(f!.message).toContain("October 28, 2026");
+    expect(f!.message).toContain("Contact Picker");
+  });
+
+  it("adds an 'enforced' note to contacts finding when targeting API 37+", async () => {
+    const ctx: PreflightContext = {
+      manifest: { ...makeManifest(["android.permission.READ_CONTACTS"]), targetSdk: 37 },
+      config: { ...DEFAULT_PREFLIGHT_CONFIG, allowedPermissions: [] },
+    };
+    const findings = await permissionsScanner.scan(ctx);
+    const f = findings.find((f) => f.ruleId === "contacts-permission-broad");
+    expect(f!.message).toContain("so this is enforced");
+  });
+
+  // --- Sensitive-permissions policy: Location minimum scope (Oct 28, 2026) ---
+
+  it("flags ACCESS_FINE_LOCATION as location-minimal-scope info", async () => {
+    const findings = await permissionsScanner.scan(
+      makeCtx(["android.permission.ACCESS_FINE_LOCATION"]),
+    );
+    const f = findings.find((f) => f.ruleId === "location-minimal-scope");
+    expect(f).toBeDefined();
+    expect(f!.severity).toBe("info");
+    expect(f!.message).toContain("location button");
+    expect(f!.message).toContain("October 28, 2026");
+  });
+
+  it("escalates location-minimal-scope to warning when targeting API 37+", async () => {
+    const ctx: PreflightContext = {
+      manifest: { ...makeManifest(["android.permission.ACCESS_FINE_LOCATION"]), targetSdk: 37 },
+      config: { ...DEFAULT_PREFLIGHT_CONFIG, allowedPermissions: [] },
+    };
+    const findings = await permissionsScanner.scan(ctx);
+    const f = findings.find((f) => f.ruleId === "location-minimal-scope");
+    expect(f).toBeDefined();
+    expect(f!.severity).toBe("warning");
+    expect(f!.message).toContain("targets API 37");
+  });
+
+  it("respects allowedPermissions for location-minimal-scope", async () => {
+    const findings = await permissionsScanner.scan(
+      makeCtx(
+        ["android.permission.ACCESS_FINE_LOCATION"],
+        ["android.permission.ACCESS_FINE_LOCATION"],
+      ),
+    );
+    expect(findings.find((f) => f.ruleId === "location-minimal-scope")).toBeUndefined();
+  });
+
   // --- April 2026 policy: Health Connect granular permissions ---
 
   it("flags READ_ALL_HEALTH_DATA as warning on targetSdk 36", async () => {

@@ -65,7 +65,7 @@ export async function initProject(options: InitOptions): Promise<InitResult> {
   const preflightrc = JSON.stringify(
     {
       failOn: "error",
-      targetSdkMinimum: 35,
+      targetSdkMinimum: 36,
       maxDownloadSizeMb: 150,
       allowedPermissions: [],
       disabledRules: [],

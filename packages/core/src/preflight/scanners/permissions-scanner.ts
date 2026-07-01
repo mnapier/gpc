@@ -224,7 +224,9 @@ export const permissionsScanner: PreflightScanner = {
       }
     }
 
-    // April 2026 policy: Contacts Permission — broad access deprecated
+    // Sensitive-permissions policy (announced April 15, 2026): broad contacts
+    // access is deprecated in favor of the Android Contact Picker. Mandatory for
+    // apps targeting Android 17 (API 37+) on October 28, 2026.
     const contactsPerms = [
       "android.permission.READ_CONTACTS",
       "android.permission.WRITE_CONTACTS",
@@ -232,15 +234,38 @@ export const permissionsScanner: PreflightScanner = {
 
     if (contactsPerms.length > 0) {
       const names = contactsPerms.map((p) => p.split(".").pop()).join(", ");
+      const enforced =
+        manifest.targetSdk >= 37
+          ? ` Your app targets API ${manifest.targetSdk}, so this is enforced.`
+          : "";
       findings.push({
         scanner: "permissions",
         ruleId: "contacts-permission-broad",
         severity: "warning",
         title: "Broad contacts access requires migration to Contact Picker",
-        message: `Your app declares ${names}. Google Play now requires the Android Contact Picker instead of broad contacts access. Compliance deadline: May 15, 2026.`,
+        message: `Your app declares ${names}. Google Play's Contacts Permissions policy requires the Android Contact Picker (Intent.ACTION_PICK_CONTACTS) unless broad access is core to your app. Mandatory for apps targeting Android 17 (API 37+) on October 28, 2026.${enforced}`,
         suggestion:
-          "Migrate to the Android Contact Picker API for user-initiated contact selection. Remove READ_CONTACTS/WRITE_CONTACTS unless your app is a dialer, messaging, or contacts management app.",
-        policyUrl: "https://support.google.com/googleplay/android-developer/answer/16926792",
+          "Migrate to the Android Contact Picker (Intent.ACTION_PICK_CONTACTS) for user-initiated contact selection, or file a Permissions Declaration Form before October 28, 2026 if the picker cannot serve your core functionality. Remove READ_CONTACTS/WRITE_CONTACTS unless your app is a dialer, messaging, or contacts management app.",
+        policyUrl: "https://support.google.com/googleplay/android-developer/answer/16935362",
+      });
+    }
+
+    // Sensitive-permissions policy (announced April 15, 2026): the Android
+    // location button is the recommended minimum scope for transactional
+    // (one-time) precise location. Mandatory for apps targeting Android 17
+    // (API 37+) on October 28, 2026.
+    const fineLocation = "android.permission.ACCESS_FINE_LOCATION";
+    if (manifest.permissions.includes(fineLocation) && !allowed.has(fineLocation)) {
+      const targetsApi37 = manifest.targetSdk >= 37;
+      findings.push({
+        scanner: "permissions",
+        ruleId: "location-minimal-scope",
+        severity: targetsApi37 ? "warning" : "info",
+        title: "Precise location — consider the location button (minimum scope)",
+        message: `Your app declares ACCESS_FINE_LOCATION. Google Play's Location Permissions policy makes the Android location button the recommended minimum scope for transactional (one-time) precise location. Mandatory for apps targeting Android 17 (API 37+) on October 28, 2026.${targetsApi37 ? ` Your app targets API ${manifest.targetSdk}.` : ""}`,
+        suggestion:
+          'For one-time/transactional precise location, use the system location button instead of requesting ACCESS_FINE_LOCATION up front. Only keep continuous fine location if navigation, fitness, or a similar feature is core functionality. Suppress via .preflightrc.json "disabledRules": ["location-minimal-scope"] if fine location is essential.',
+        policyUrl: "https://support.google.com/googleplay/android-developer/answer/17033915",
       });
     }
 

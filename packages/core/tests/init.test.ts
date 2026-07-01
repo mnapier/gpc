@@ -36,7 +36,7 @@ describe("initProject", () => {
 
     const content = JSON.parse(await readFile(join(tmpDir, ".preflightrc.json"), "utf-8"));
     expect(content.failOn).toBe("error");
-    expect(content.targetSdkMinimum).toBe(35);
+    expect(content.targetSdkMinimum).toBe(36);
   });
 
   it("creates metadata directory with listing files", async () => {

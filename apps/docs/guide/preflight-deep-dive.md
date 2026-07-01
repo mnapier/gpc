@@ -70,12 +70,12 @@ Flags the `AndroidManifest.xml` configurations that cause the fastest rejections
 - `android:usesCleartextTraffic="true"` without a network security config — **warning**.
 - Components exported without a permission guard — **warning**.
 - `QUERY_ALL_PACKAGES` permission — **error**. Requires declared justification; rarely approved.
-- Geofencing foreground service (April 2026 policy) — **warning**. Flags services with `foregroundServiceType="location"` combined with `ACCESS_BACKGROUND_LOCATION`. Google removed geofencing as an approved foreground service use case; compliance deadline is May 15, 2026. Suppress via `.preflightrc.json` if your app uses legitimate background location tracking.
+- Geofencing foreground service (April 15, 2026 policy) — **warning**. Flags services with `foregroundServiceType="location"` combined with `ACCESS_BACKGROUND_LOCATION`. Google removed geofencing as an approved foreground service use case; enforcement for apps targeting Android 17 (API 37+) begins October 28, 2026. Suppress via `.preflightrc.json` if your app uses legitimate background location tracking.
 
 ::: info Android 17 (API 37) -- Heads Up
 Android 17 reaches stable in June 2026. Apps targeting API 37 will have `screenOrientation`, `resizeableActivity`, `minAspectRatio`, and `maxAspectRatio` ignored on displays wider than 600dp (no opt-out). Background audio will require `MediaSessionService` (Media3 1.10+). A new `ACCESS_LOCAL_NETWORK` permission is required for mDNS, raw sockets, and device discovery.
 
-No preflight scanner changes yet. GPC will add a manifest check for large-screen resizability when the target SDK deadline is announced.
+Two sensitive-permission policies become mandatory for apps targeting API 37+ on **October 28, 2026**: broad contacts access must move to the Android Contact Picker, and precise location should use the location button as its minimum scope. Preflight already flags both (`contacts-permission-broad`, `location-minimal-scope`). The large-screen resizability check and the API 37 target-SDK floor will follow once the target-SDK deadline is announced.
 :::
 
 ### 2. Permissions
@@ -84,9 +84,10 @@ No preflight scanner changes yet. GPC will add a manifest check for large-screen
 
 `READ_SMS`, `SEND_SMS`, `RECEIVE_SMS`, `READ_CALL_LOG`, `WRITE_CALL_LOG`, `PROCESS_OUTGOING_CALLS`, `ACCESS_BACKGROUND_LOCATION`, `MANAGE_EXTERNAL_STORAGE`, `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `REQUEST_INSTALL_PACKAGES`, `SYSTEM_ALERT_WINDOW`, `USE_FULL_SCREEN_INTENT`, `BIND_ACCESSIBILITY_SERVICE`, `PACKAGE_USAGE_STATS`, `BIND_DEVICE_ADMIN`, `BIND_NOTIFICATION_LISTENER_SERVICE`.
 
-**April 2026 policy rules** (compliance deadline: May 15, 2026):
+**Sensitive-permissions policy rules** (announced April 15, 2026; mandatory for apps targeting Android 17 / API 37+ on October 28, 2026):
 
-- **Contacts broad access** — **warning**. Flags `READ_CONTACTS` / `WRITE_CONTACTS`. Google now requires the Android Contact Picker API instead of broad contacts access.
+- **Contacts broad access** — **warning**. Flags `READ_CONTACTS` / `WRITE_CONTACTS`. Google requires the Android Contact Picker (`Intent.ACTION_PICK_CONTACTS`) instead of broad contacts access unless it is core to your app.
+- **Location minimum scope** — **info**, **warning** on targetSdk 37+. Flags `ACCESS_FINE_LOCATION`. The Android location button is the recommended minimum scope for transactional (one-time) precise location.
 - **Health Connect granular permissions** — **warning** on targetSdk 36+, **info** otherwise. Flags `READ_ALL_HEALTH_DATA`. Android 16 requires individual Health Connect data type permissions.
 
 Declared permissions you've already approved in Play Console? Add them to `allowedPermissions` in `.preflightrc.json` and the scanner will skip them for that project.
@@ -180,7 +181,7 @@ Commit a `.preflightrc.json` to your repo root for project-specific tuning:
 ```json
 {
   "failOn": "error",
-  "targetSdkMinimum": 35,
+  "targetSdkMinimum": 36,
   "maxDownloadSizeMb": 200,
   "allowedPermissions": [
     "android.permission.READ_SMS",
@@ -202,7 +203,7 @@ Common patterns:
 
 **Legacy `cleartextTraffic`.** Old apps migrating to HTTPS can temporarily `disabledRules: ["manifest-cleartext-traffic"]` while rolling out network security config per-domain.
 
-**Stricter SDK floor.** Teams publishing new apps targeting 36+ can set `targetSdkMinimum: 36` and catch any dependency that drops below. GPC's default (35) tracks Google Play's current floor — override upward, not downward.
+**Stricter SDK floor.** GPC's default `targetSdkMinimum` is 36 (Android 16, required for new apps and updates on August 31, 2026). Teams can raise it further as they adopt newer targets and catch any dependency that drops below — override upward, not downward.
 
 ## CI patterns
 

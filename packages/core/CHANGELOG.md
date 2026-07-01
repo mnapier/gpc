@@ -1,5 +1,15 @@
 # @gpc-cli/core
 
+## 0.9.73
+
+### Patch Changes
+
+- preflight: refresh sensitive-permission checks for Google Play's October 28, 2026 deadline (apps targeting Android 17 / API 37+)
+  - Contacts (`contacts-permission-broad`): message now cites the October 28, 2026 enforcement date and the Android Contact Picker (`Intent.ACTION_PICK_CONTACTS`) alternative, and adds an "enforced" note when the app targets API 37+.
+  - New `location-minimal-scope` rule: flags `ACCESS_FINE_LOCATION` and recommends the Android location button as the minimum scope for transactional (one-time) precise location (info; warning when targeting API 37+).
+  - Geofencing (`geofencing-foreground-service`): corrected the stale May 15, 2026 date to the October 28, 2026 API 37+ enforcement window and points to the Geofencing API as the migration path.
+  - `gpc init` now scaffolds `.preflightrc.json` with `targetSdkMinimum: 36` (the current Play floor) instead of 35.
+
 ## 0.9.71
 
 ### Patch Changes

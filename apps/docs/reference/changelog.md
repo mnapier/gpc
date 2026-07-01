@@ -11,7 +11,20 @@ head:
 
 All notable user-facing changes to GPC are documented here. For full release details, see the [GitHub Releases](https://github.com/yasserstudio/gpc/releases) page.
 
-## v0.9.87 <Badge type="tip" text="latest" />
+## v0.9.88 <Badge type="tip" text="latest" />
+
+Preflight compliance refresh for Google Play's October 28, 2026 sensitive-permission deadlines (apps targeting Android 17 / API 37+).
+
+- preflight: contacts check (`contacts-permission-broad`) now cites the October 28, 2026 enforcement date and the Android Contact Picker (`Intent.ACTION_PICK_CONTACTS`) alternative, and notes when your app already targets API 37+.
+- preflight: new `location-minimal-scope` rule flags `ACCESS_FINE_LOCATION` and recommends the Android location button as the minimum scope for one-time precise location (info; warning at API 37+).
+- preflight: geofencing check (`geofencing-foreground-service`) updated to the October 28, 2026 API 37+ enforcement window; points to the Geofencing API for migration.
+- fix: `gpc init` scaffolds `.preflightrc.json` with `targetSdkMinimum: 36` (the current Play floor) instead of 35.
+
+**Tests:** 2,418 (+5).
+
+---
+
+## v0.9.87
 
 Consistent list output and compliance docs.
 
