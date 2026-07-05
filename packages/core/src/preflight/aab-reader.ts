@@ -46,7 +46,7 @@ export async function readAab(aabPath: string): Promise<AabContents> {
     buffer = await readFile(aabPath);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Could not read ${aabPath}: ${msg}`);
+    throw new Error(`Could not read ${aabPath}: ${msg}`, { cause: err });
   }
 
   const { zipfile, entries, manifestBuf, soHeaders } = await openAndScan(buffer, manifestPath);
